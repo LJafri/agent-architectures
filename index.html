@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic AI, Drawn to the Metal — Laraib Jafri</title>
+    <meta name="description" content="15 low-level architecture diagrams of agentic AI systems: prompt to token to inference, the agent loop, tool calling, MCP, RAG, memory, multi-agent orchestration, guardrails, evals, and observability.">
+    <meta name="author" content="Laraib Jafri">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://ljafri.me/agent-architectures/">
+
+    <meta property="og:title" content="Agentic AI, Drawn to the Metal">
+    <meta property="og:description" content="15 low-level architecture diagrams: from prompt to token to inference, through the agent loop, MCP, evals, and observability.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://ljafri.me/agent-architectures/">
+    <meta property="og:site_name" content="Laraib Jafri">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../assets/favicon.png?v=2">
+    <meta name="theme-color" content="#5eead4">
+
+<style>
+/* ============================================================
+   AGENT ARCHITECTURES — field atlas / engineering datasheet
+   Shares design tokens with ljafri.me
+   ============================================================ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+    --primary:#5eead4; --primary-dark:#2dd4bf;
+    --secondary:#a78bfa; --secondary-dark:#8b5cf6;
+    --tertiary:#fbbf24;
+    --error:#f87171;
+    --surface-dim:#0c0f14; --surface:#0f1419; --surface-bright:#151b23;
+    --sc:#141a22; --sc-high:#1c232d; --sc-highest:#252d39;
+    --on:#f1f5f9; --on-var:#94a3b8; --on-muted:#64748b; --on-dim:#475569;
+    --outline:#334155; --outline-var:#1e293b;
+    --font-body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:'JetBrains Mono','SF Mono',monospace;
+}
+
+html { scroll-behavior:smooth; scroll-padding-top:90px; }
+
+body {
+    font-family:var(--font-body);
+    background-color:var(--surface-dim);
+    background-image:
+        linear-gradient(rgba(148,163,184,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,0.035) 1px, transparent 1px);
+    background-size:36px 36px;
+    color:var(--on);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+}
+
+.mono { font-family:var(--mono); }
+a { color:var(--primary); text-decoration:none; }
+a:hover { color:var(--primary-dark); }
+
+/* ---- top bar ---- */
+.topbar {
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0.9rem 2rem;
+    background:rgba(12,15,20,0.85); backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--outline-var);
+    font-family:var(--mono); font-size:0.8rem;
+}
+.topbar .crumb { color:var(--on-var); letter-spacing:0.04em; }
+.topbar .crumb a { color:var(--primary); font-weight:600; }
+.topbar .crumb span { color:var(--on-dim); }
+.topbar .right a { color:var(--on-var); border:1px solid var(--outline); padding:0.35rem 0.8rem; border-radius:999px; transition:all .2s; }
+.topbar .right a:hover { color:var(--primary); border-color:var(--primary); }
+
+/* ---- hero ---- */
+.hero { max-width:1180px; margin:0 auto; padding:9.5rem 2rem 3.5rem; }
+.hero .overline {
+    font-family:var(--mono); font-size:0.75rem; font-weight:600;
+    letter-spacing:0.22em; color:var(--primary); text-transform:uppercase;
+}
+.hero h1 {
+    font-size:clamp(2.2rem, 5.4vw, 3.9rem); font-weight:800;
+    letter-spacing:-0.03em; line-height:1.05; margin:0.9rem 0 1.2rem;
+}
+.hero h1 em { font-style:normal; color:var(--primary); }
+.hero .lede { max-width:62ch; color:var(--on-var); font-size:1.05rem; font-weight:300; }
+.hero .lede strong { color:var(--on); font-weight:600; }
+
+.hero-meta { display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:1.8rem; }
+.chip {
+    font-family:var(--mono); font-size:0.72rem; letter-spacing:0.06em;
+    color:var(--on-var); border:1px solid var(--outline);
+    padding:0.35rem 0.85rem; border-radius:999px; background:rgba(20,26,34,0.6);
+}
+.chip b { color:var(--primary); font-weight:600; }
+
+/* wire legend */
+.legend { display:flex; flex-wrap:wrap; gap:1.4rem; margin-top:2.2rem; padding:1rem 1.3rem;
+    border:1px dashed var(--outline); border-radius:12px; background:rgba(15,20,25,0.55); }
+.legend .li { display:flex; align-items:center; gap:0.55rem; font-family:var(--mono); font-size:0.72rem; color:var(--on-var); letter-spacing:0.04em; }
+.legend .sw { width:34px; height:0; border-top:2px solid; border-radius:2px; }
+.legend .sw.d { border-top-style:dashed; }
+
+/* ---- layout ---- */
+.layout { max-width:1180px; margin:0 auto; padding:0 2rem 6rem; display:grid; grid-template-columns:215px 1fr; gap:2.6rem; align-items:start; }
+
+.fignav { position:sticky; top:92px; font-family:var(--mono); font-size:0.72rem; max-height:calc(100vh - 120px); overflow-y:auto; padding-right:0.4rem; }
+.fignav .part-label { color:var(--on-dim); letter-spacing:0.14em; font-size:0.62rem; margin:1.3rem 0 0.45rem; text-transform:uppercase; }
+.fignav .part-label:first-child { margin-top:0; }
+.fignav a { display:flex; gap:0.5rem; color:var(--on-muted); padding:0.28rem 0.55rem; border-left:2px solid var(--outline-var); line-height:1.35; transition:all .15s; }
+.fignav a .n { color:var(--on-dim); }
+.fignav a:hover { color:var(--on); }
+.fignav a.active { color:var(--primary); border-left-color:var(--primary); background:rgba(94,234,212,0.05); }
+.fignav a.active .n { color:var(--primary); }
+
+/* ---- parts & figures ---- */
+.part-head { margin:3.2rem 0 0.6rem; display:flex; align-items:baseline; gap:1rem; }
+.part-head:first-child { margin-top:0; }
+.part-head .pn { font-family:var(--mono); font-size:0.72rem; font-weight:700; letter-spacing:0.2em; color:var(--secondary); }
+.part-head h2 { font-size:1.35rem; font-weight:700; letter-spacing:-0.01em; }
+.part-head::after { content:""; flex:1; height:1px; background:var(--outline-var); }
+
+.fig {
+    margin:1.6rem 0 2.6rem; border:1px solid var(--outline-var); border-radius:16px;
+    background:linear-gradient(180deg, rgba(21,27,35,0.75), rgba(15,20,25,0.9));
+    overflow:hidden;
+    opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease;
+}
+.fig.vis { opacity:1; transform:none; }
+
+.fig-head { display:flex; align-items:flex-start; gap:1.1rem; padding:1.3rem 1.5rem 1rem; border-bottom:1px solid var(--outline-var); }
+.fig-no { font-family:var(--mono); font-size:0.78rem; font-weight:700; color:var(--primary); letter-spacing:0.08em; padding-top:0.25rem; white-space:nowrap; }
+.fig-head h3 { font-size:1.18rem; font-weight:700; letter-spacing:-0.01em; }
+.fig-lede { color:var(--on-var); font-size:0.88rem; font-weight:300; margin-top:0.3rem; max-width:70ch; }
+.fig-tag { margin-left:auto; font-family:var(--mono); font-size:0.6rem; letter-spacing:0.16em; color:var(--on-muted); border:1px solid var(--outline); padding:0.25rem 0.6rem; border-radius:4px; white-space:nowrap; }
+
+.svg-wrap { padding:1.2rem 1rem; overflow-x:auto; }
+.svg-wrap svg { display:block; width:100%; min-width:780px; height:auto; font-family:var(--mono); }
+
+.fig-notes { display:grid; grid-template-columns:1fr 1fr; gap:0; border-top:1px solid var(--outline-var); }
+.note { padding:1.1rem 1.5rem 1.3rem; }
+.note + .note { border-left:1px solid var(--outline-var); }
+.note h4 { font-family:var(--mono); font-size:0.64rem; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:0.55rem; }
+.note.design h4 { color:var(--primary); }
+.note.breaks h4 { color:var(--tertiary); }
+.note ul { list-style:none; }
+.note li { font-size:0.82rem; color:var(--on-var); font-weight:300; padding-left:1rem; position:relative; margin-bottom:0.4rem; }
+.note li::before { content:"▸"; position:absolute; left:0; color:var(--on-dim); font-size:0.7rem; top:0.1rem; }
+.note li b, .note li strong { color:var(--on); font-weight:600; }
+.note li code { font-family:var(--mono); font-size:0.74rem; color:var(--primary); background:rgba(94,234,212,0.08); padding:0.05rem 0.3rem; border-radius:4px; }
+
+/* ---- SVG visual language ---- */
+svg .nd   { fill:#151b23; stroke:#334155; stroke-width:1.2; }
+svg .nd-t { fill:rgba(94,234,212,0.08);  stroke:#2dd4bf; stroke-width:1.3; }
+svg .nd-v { fill:rgba(167,139,250,0.09); stroke:#8b5cf6; stroke-width:1.3; }
+svg .nd-a { fill:rgba(251,191,36,0.08);  stroke:#b48a24; stroke-width:1.3; }
+svg .nd-e { fill:rgba(248,113,113,0.07); stroke:#b45555; stroke-width:1.3; }
+svg .ghost{ fill:rgba(21,27,35,0.4); stroke:#334155; stroke-width:1.1; stroke-dasharray:4 4; }
+svg .grp  { fill:rgba(15,20,25,0.55); stroke:#26334a; stroke-width:1.1; stroke-dasharray:7 5; }
+svg .bar  { fill:#1c232d; stroke:#334155; stroke-width:1; }
+
+svg .lbl  { fill:#f1f5f9; font-size:13px; font-weight:600; text-anchor:middle; letter-spacing:0.02em; }
+svg .lbl2 { fill:#f1f5f9; font-size:11.5px; font-weight:600; text-anchor:middle; }
+svg .sub  { fill:#94a3b8; font-size:10px; text-anchor:middle; }
+svg .tiny { fill:#64748b; font-size:9.5px; text-anchor:middle; }
+svg .tinyt{ fill:#5eead4; font-size:9.5px; text-anchor:middle; }
+svg .tinyv{ fill:#a78bfa; font-size:9.5px; text-anchor:middle; }
+svg .tinya{ fill:#fbbf24; font-size:9.5px; text-anchor:middle; }
+svg .tinye{ fill:#f87171; font-size:9.5px; text-anchor:middle; }
+svg .cap  { fill:#5eead4; font-size:10px; font-weight:700; letter-spacing:0.14em; text-anchor:start; }
+svg .capv { fill:#a78bfa; font-size:10px; font-weight:700; letter-spacing:0.14em; text-anchor:start; }
+svg .capa { fill:#fbbf24; font-size:10px; font-weight:700; letter-spacing:0.14em; text-anchor:start; }
+svg .capm { fill:#64748b; font-size:10px; font-weight:700; letter-spacing:0.14em; text-anchor:start; }
+svg .ta-s { text-anchor:start; }
+svg .ta-e { text-anchor:end; }
+
+svg .flow { fill:none; stroke:#5eead4; stroke-width:1.6; }
+svg .ctl  { fill:none; stroke:#a78bfa; stroke-width:1.6; }
+svg .fb   { fill:none; stroke:#fbbf24; stroke-width:1.5; }
+svg .err  { fill:none; stroke:#f87171; stroke-width:1.5; }
+svg .mut  { fill:none; stroke:#475569; stroke-width:1.4; }
+svg .dash { stroke-dasharray:5 4; }
+
+svg .stepc { fill:#0c0f14; stroke:#5eead4; stroke-width:1.3; }
+svg .stepn { fill:#5eead4; font-size:9.5px; font-weight:700; text-anchor:middle; }
+
+/* ---- footer ---- */
+footer { border-top:1px solid var(--outline-var); padding:2.5rem 2rem 3rem; text-align:center; font-family:var(--mono); font-size:0.75rem; color:var(--on-muted); }
+footer a { color:var(--primary); }
+
+@media (max-width: 900px) {
+    .layout { grid-template-columns:1fr; }
+    .fignav { display:none; }
+    .fig-notes { grid-template-columns:1fr; }
+    .note + .note { border-left:none; border-top:1px solid var(--outline-var); }
+    .fig-head { flex-wrap:wrap; }
+    .fig-tag { margin-left:0; }
+    .topbar { padding:0.8rem 1.2rem; }
+    .hero { padding:7.5rem 1.2rem 2.5rem; }
+    .layout { padding:0 1.2rem 4rem; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- shared SVG defs: arrowheads usable by every inline diagram -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="arr-t" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5eead4"/>
+    </marker>
+    <marker id="arr-v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a78bfa"/>
+    </marker>
+    <marker id="arr-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arr-e" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f87171"/>
+    </marker>
+    <marker id="arr-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+</svg>
+
+<header class="topbar">
+    <div class="crumb"><a href="/">LJ</a> <span>/</span> agent-architectures</div>
+    <div class="right"><a href="/#contact">get in touch</a></div>
+</header>
+
+<section class="hero">
+    <div class="overline">Field Atlas · 15 Figures</div>
+    <h1>Agentic AI,<br><em>drawn to the metal.</em></h1>
+    <p class="lede">Most agent diagrams stop at "LLM + tools." These don't. Fifteen low-level schematics of how agentic systems actually work — <strong>how a prompt becomes tokens becomes inference</strong>, how the loop turns model output into side-effects, and the part everyone skips: <strong>the eval harness and observability plane</strong> that make any of it trustworthy in production.</p>
+    <div class="hero-meta">
+        <span class="chip"><b>15</b> figures</span>
+        <span class="chip"><b>4</b> layers: substrate → core → scale → evals</span>
+        <span class="chip">hand-drawn SVG · no frameworks</span>
+        <span class="chip">Laraib Jafri · 2026</span>
+    </div>
+    <div class="legend" aria-label="Diagram legend">
+        <div class="li"><span class="sw" style="border-color:#5eead4"></span> data path</div>
+        <div class="li"><span class="sw" style="border-color:#a78bfa"></span> control / loop</div>
+        <div class="li"><span class="sw" style="border-color:#fbbf24"></span> eval &amp; feedback signal</div>
+        <div class="li"><span class="sw" style="border-color:#f87171"></span> failure / blocked</div>
+        <div class="li"><span class="sw d" style="border-color:#64748b"></span> async · optional</div>
+    </div>
+</section>
+
+<div class="layout">
+    <nav class="fignav" aria-label="Figures">
+        <div class="part-label">I — Substrate</div>
+        <a href="#fig-01"><span class="n">01</span> Prompt → token → inference</a>
+        <a href="#fig-02"><span class="n">02</span> Inference serving path</a>
+        <a href="#fig-03"><span class="n">03</span> Context window assembly</a>
+        <div class="part-label">II — Agent core</div>
+        <a href="#fig-04"><span class="n">04</span> The agent loop</a>
+        <a href="#fig-05"><span class="n">05</span> Anatomy of a tool call</a>
+        <a href="#fig-06"><span class="n">06</span> MCP architecture</a>
+        <a href="#fig-07"><span class="n">07</span> RAG pipeline</a>
+        <a href="#fig-08"><span class="n">08</span> Memory architecture</a>
+        <div class="part-label">III — Scale &amp; safety</div>
+        <a href="#fig-09"><span class="n">09</span> Multi-agent orchestration</a>
+        <a href="#fig-10"><span class="n">10</span> Guardrails &amp; HITL</a>
+        <a href="#fig-11"><span class="n">11</span> Failure modes &amp; recovery</a>
+        <div class="part-label">IV — Evals &amp; observability</div>
+        <a href="#fig-12"><span class="n">12</span> The eval harness</a>
+        <a href="#fig-13"><span class="n">13</span> LLM-as-judge, calibrated</a>
+        <a href="#fig-14"><span class="n">14</span> Observability plane</a>
+        <a href="#fig-15"><span class="n">15</span> The data flywheel</a>
+    </nav>
+
+    <div class="figs">
+<div class="part-head" id="part-1"><span class="pn">PART I</span><h2>The Substrate</h2></div>
+
+<article class="fig" id="fig-01">
+  <div class="fig-head">
+    <span class="fig-no">FIG·01</span>
+    <div>
+      <h3>From prompt to token to inference</h3>
+      <p class="fig-lede">The full round trip of one generated token: text is tokenized to integer IDs, embedded, pushed through the transformer stack, scored into logits, sampled — then the chosen token is appended and the whole thing runs again. An "agent thinking" is this loop, thousands of times.</p>
+    </div>
+    <span class="fig-tag">SUBSTRATE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 520" role="img" aria-label="Diagram of the token generation lifecycle from prompt text through tokenization, embedding, transformer layers, logits, sampling, and the autoregressive loop">
+    <!-- row 1: text -> ids -> vectors -->
+    <rect class="nd" x="20" y="40" width="130" height="60" rx="8"/>
+    <text class="lbl" x="85" y="65">PROMPT</text>
+    <text class="sub" x="85" y="82">"Explain KV caches"</text>
+    <path class="flow" d="M150,70 H172" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="180" y="40" width="130" height="60" rx="8"/>
+    <text class="lbl" x="245" y="65">TOKENIZER</text>
+    <text class="sub" x="245" y="82">BPE merges</text>
+    <path class="flow" d="M310,70 H332" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="340" y="40" width="140" height="60" rx="8"/>
+    <text class="lbl" x="410" y="65">TOKEN IDS</text>
+    <text class="sub" x="410" y="82">[849, 34745, …]</text>
+    <path class="flow" d="M480,70 H502" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="510" y="40" width="140" height="60" rx="8"/>
+    <text class="lbl" x="580" y="65">EMBEDDINGS</text>
+    <text class="sub" x="580" y="82">id → vector ℝᵈ</text>
+    <path class="flow" d="M650,70 C672,70 672,84 698,84" marker-end="url(#arr-t)"/>
+
+    <!-- transformer stack -->
+    <rect class="grp" x="690" y="30" width="250" height="230" rx="10"/>
+    <text class="cap" x="704" y="50">TRANSFORMER · ×N LAYERS</text>
+    <rect class="nd" x="705" y="60" width="220" height="48" rx="7"/>
+    <text class="lbl2" x="815" y="80">ATTENTION</text>
+    <text class="sub" x="815" y="96">reads all prior K,V</text>
+    <path class="flow" d="M815,108 V122" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="705" y="130" width="220" height="44" rx="7"/>
+    <text class="lbl2" x="815" y="156">MLP</text>
+    <path class="ctl dash" d="M928,180 C955,150 955,90 930,64" marker-end="url(#arr-v)"/>
+    <text class="tinyv" x="944" y="212">×N</text>
+    <text class="tiny" x="815" y="200">hidden state flows down the stack —</text>
+    <text class="tiny" x="815" y="214">each layer refines the representation</text>
+
+    <!-- kv cache -->
+    <rect class="nd-a" x="705" y="280" width="220" height="48" rx="8"/>
+    <text class="lbl2" x="815" y="300">KV CACHE</text>
+    <text class="sub" x="815" y="316">K,V per layer · per sequence</text>
+    <path class="fb dash" d="M770,260 V274" marker-end="url(#arr-a)"/>
+    <path class="fb dash" d="M860,274 V262" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="733" y="272">write</text>
+    <text class="tinya" x="893" y="272">read</text>
+
+    <!-- row 2: logits -> sample (right to left) -->
+    <path class="flow" d="M935,260 V354" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="760" y="360" width="180" height="52" rx="8"/>
+    <text class="lbl" x="850" y="381">LM HEAD</text>
+    <text class="sub" x="850" y="398">hidden → logits</text>
+    <path class="flow" d="M758,386 H708" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="540" y="360" width="160" height="52" rx="8"/>
+    <text class="lbl" x="620" y="381">LOGITS</text>
+    <text class="sub" x="620" y="398">score per vocab id</text>
+    <path class="flow" d="M538,386 H488" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="330" y="360" width="150" height="52" rx="8"/>
+    <text class="lbl" x="405" y="381">SAMPLER</text>
+    <text class="sub" x="405" y="398">temp · top-p · top-k</text>
+    <path class="flow" d="M328,386 H278" marker-end="url(#arr-t)"/>
+    <rect class="nd-t" x="130" y="360" width="140" height="52" rx="8"/>
+    <text class="lbl" x="200" y="381">NEXT TOKEN</text>
+    <text class="sub" x="200" y="398">' caches'</text>
+
+    <!-- row 3: back to text -->
+    <path class="flow" d="M200,412 V444" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="130" y="450" width="140" height="46" rx="8"/>
+    <text class="lbl2" x="200" y="469">DETOKENIZE</text>
+    <text class="tiny" x="200" y="484">ids → text</text>
+    <path class="flow" d="M270,473 H322" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="330" y="450" width="180" height="46" rx="8"/>
+    <text class="lbl2" x="415" y="469">STREAM TO CLIENT</text>
+    <text class="tiny" x="415" y="484">SSE delta events</text>
+
+    <!-- autoregressive loop -->
+    <path class="ctl dash" d="M128,386 H60 V140 H410 V106" marker-end="url(#arr-v)"/>
+    <text class="tinyv" x="235" y="130">append token → run the next forward pass (autoregressive)</text>
+    <text class="tiny" x="620" y="440">one full forward pass per output token —</text>
+    <text class="tiny" x="620" y="454">this is why decode speed is the agent's heartbeat</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Tokens are the only currency.</b> The model never sees words, JSON, or "instructions" — just integer IDs. Every prompt-engineering trick is really token-sequence engineering.</li>
+      <li><b>The KV cache is why long contexts are viable:</b> attention keys/values for past tokens are computed once, then reused every subsequent step.</li>
+      <li>Sampling parameters live <em>outside</em> the model — same logits, different temperature, different agent behavior. Treat them as config under version control.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Tokenizer surprises:</b> whitespace, numbers, and rare strings split unpredictably — string-length budgeting drifts from token-length reality.</li>
+      <li>KV cache memory grows linearly with sequence length × layers — long agent sessions get evicted or repriced, not "slow".</li>
+      <li>Greedy decoding isn't determinism: batching, kernels, and floating-point order still introduce run-to-run variance. Evals must assume it.</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-02">
+  <div class="fig-head">
+    <span class="fig-no">FIG·02</span>
+    <div>
+      <h3>The inference serving path</h3>
+      <p class="fig-lede">What sits between your <code style="font-family:var(--mono);font-size:0.85em">messages.create()</code> and the GPU: gateways, routing, continuous batching, and the prefill/decode split. Latency and cost behavior of every agent is decided in this pipeline.</p>
+    </div>
+    <span class="fig-tag">SUBSTRATE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 480" role="img" aria-label="Diagram of an LLM inference serving stack from client through gateway, router, scheduler, and GPU fleet with prefill, decode, KV cache pool and streaming response">
+    <rect class="nd" x="20" y="60" width="120" height="56" rx="8"/>
+    <text class="lbl" x="80" y="81">CLIENT</text>
+    <text class="sub" x="80" y="98">agent runtime</text>
+    <path class="flow" d="M140,88 H162" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="170" y="60" width="150" height="56" rx="8"/>
+    <text class="lbl" x="245" y="81">API GATEWAY</text>
+    <text class="sub" x="245" y="98">auth · rate limit</text>
+    <path class="flow" d="M320,88 H342" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="350" y="60" width="130" height="56" rx="8"/>
+    <text class="lbl" x="415" y="81">ROUTER</text>
+    <text class="sub" x="415" y="98">model select</text>
+    <path class="flow" d="M480,88 H502" marker-end="url(#arr-t)"/>
+    <rect class="nd-v" x="510" y="60" width="180" height="56" rx="8"/>
+    <text class="lbl" x="600" y="81">SCHEDULER</text>
+    <text class="sub" x="600" y="98">continuous batching</text>
+    <text class="tiny" x="600" y="134">admission queue · new requests</text>
+    <text class="tiny" x="600" y="147">join the batch every decode step</text>
+    <path class="flow" d="M690,88 H740" marker-end="url(#arr-t)"/>
+
+    <!-- gpu fleet -->
+    <rect class="grp" x="735" y="30" width="205" height="330" rx="10"/>
+    <text class="cap" x="749" y="50">GPU FLEET</text>
+    <rect class="nd" x="750" y="70" width="175" height="50" rx="7"/>
+    <text class="lbl2" x="837" y="90">PREFILL</text>
+    <text class="sub" x="837" y="106">compute-bound</text>
+    <text class="tinyt" x="837" y="135">TTFT lives here</text>
+    <path class="flow" d="M837,120 V154" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="750" y="160" width="175" height="50" rx="7"/>
+    <text class="lbl2" x="837" y="180">DECODE</text>
+    <text class="sub" x="837" y="196">memory-bandwidth-bound</text>
+    <text class="tinyt" x="837" y="226">TPOT · tokens/sec</text>
+    <rect class="nd-a" x="750" y="250" width="175" height="50" rx="7"/>
+    <text class="lbl2" x="837" y="270">KV CACHE POOL</text>
+    <text class="sub" x="837" y="286">paged blocks</text>
+    <path class="fb dash" d="M800,210 V244" marker-end="url(#arr-a)"/>
+    <path class="fb dash" d="M875,244 V212" marker-end="url(#arr-a)"/>
+    <rect class="ghost" x="750" y="316" width="175" height="36" rx="7"/>
+    <text class="sub" x="837" y="331">MODEL WEIGHTS</text>
+    <text class="tiny" x="837" y="345">quantized · resident in HBM</text>
+
+    <!-- prompt cache fast path -->
+    <path class="flow dash" d="M415,58 C415,10 680,12 746,176" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="565" y="24">prefix-cache hit → skip prefill entirely</text>
+
+    <!-- streaming return -->
+    <path class="flow dash" d="M837,360 V420 H80 V124" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="460" y="412">SSE stream — token deltas returned as they are decoded</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Prefill and decode are different workloads:</b> prefill chews the whole prompt in parallel (compute-bound); decode emits one token per step (memory-bandwidth-bound). Time-to-first-token and tokens/sec are set by different hardware limits.</li>
+      <li><b>Continuous batching</b> lets new requests join at every decode step — throughput without head-of-line blocking. It's why your p50 and p99 diverge under load.</li>
+      <li><b>Prompt caching is an architecture decision, not a discount:</b> stable prefixes (system prompt, tool schemas) should come first so repeated calls skip prefill.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li>Agents multiply this path: a 20-step run is 20 serving round-trips. Per-request overhead that's invisible in a chatbot dominates in an agent.</li>
+      <li>One byte changed early in the prompt invalidates the cached prefix — a "harmless" dynamic timestamp in the system prompt can double your bill.</li>
+      <li>Rate limits hit token throughput, not request count. Fan-out (multi-agent) designs need budgets per branch or they starve each other.</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-03">
+  <div class="fig-head">
+    <span class="fig-no">FIG·03</span>
+    <div>
+      <h3>Context window assembly</h3>
+      <p class="fig-lede">"Context engineering" is a build step. Six competing sources get prioritized, budgeted, truncated, and ordered into one flat token array — because that's all the model ever receives.</p>
+    </div>
+    <span class="fig-tag">SUBSTRATE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 460" role="img" aria-label="Diagram of context window assembly: system prompt, tool schemas, memory, RAG chunks, history and user message are merged by an assembler into one budgeted token sequence fed to the model">
+    <rect class="nd" x="20" y="30" width="190" height="46" rx="7"/>
+    <text class="lbl2" x="115" y="48">SYSTEM PROMPT</text>
+    <text class="sub" x="115" y="63">identity · rules · tone</text>
+    <rect class="nd" x="20" y="90" width="190" height="46" rx="7"/>
+    <text class="lbl2" x="115" y="108">TOOL SCHEMAS</text>
+    <text class="sub" x="115" y="123">JSON Schema defs</text>
+    <rect class="nd" x="20" y="150" width="190" height="46" rx="7"/>
+    <text class="lbl2" x="115" y="168">MEMORY RECALL</text>
+    <text class="sub" x="115" y="183">facts · preferences</text>
+    <rect class="nd" x="20" y="210" width="190" height="46" rx="7"/>
+    <text class="lbl2" x="115" y="228">RAG CHUNKS</text>
+    <text class="sub" x="115" y="243">top-k · reranked</text>
+    <rect class="nd" x="20" y="270" width="190" height="46" rx="7"/>
+    <text class="lbl2" x="115" y="288">HISTORY</text>
+    <text class="sub" x="115" y="303">prior turns · observations</text>
+    <rect class="nd-t" x="20" y="330" width="190" height="46" rx="7"/>
+    <text class="lbl2" x="115" y="348">USER MESSAGE</text>
+    <text class="sub" x="115" y="363">the current ask</text>
+
+    <path class="mut" d="M210,53 C258,53 258,165 294,165" marker-end="url(#arr-m)"/>
+    <path class="mut" d="M210,113 C258,113 258,185 294,185" marker-end="url(#arr-m)"/>
+    <path class="mut" d="M210,173 C258,173 258,205 294,205" marker-end="url(#arr-m)"/>
+    <path class="mut" d="M210,233 C258,233 258,225 294,225" marker-end="url(#arr-m)"/>
+    <path class="mut" d="M210,293 C258,293 258,245 294,245" marker-end="url(#arr-m)"/>
+    <path class="flow" d="M210,353 C258,353 258,265 294,265" marker-end="url(#arr-t)"/>
+    <text class="tinyv" x="248" y="322">oldest history →</text>
+    <text class="tinyv" x="248" y="334">summarized first</text>
+
+    <rect class="nd-v" x="300" y="150" width="190" height="130" rx="10"/>
+    <text class="lbl" x="395" y="196">CONTEXT</text>
+    <text class="lbl" x="395" y="214">ASSEMBLER</text>
+    <text class="sub" x="395" y="238">priority · token budget</text>
+    <text class="sub" x="395" y="253">truncate · summarize</text>
+    <path class="flow" d="M490,215 H532" marker-end="url(#arr-t)"/>
+
+    <!-- final sequence bar -->
+    <text class="capm" x="540" y="172">FINAL SEQUENCE — ONE FLAT TOKEN ARRAY</text>
+    <rect x="540" y="185" width="55"  height="60" fill="rgba(94,234,212,0.28)" stroke="#2dd4bf" stroke-width="1"/>
+    <rect x="595" y="185" width="55"  height="60" fill="rgba(167,139,250,0.28)" stroke="#8b5cf6" stroke-width="1"/>
+    <rect x="650" y="185" width="45"  height="60" fill="#252d39" stroke="#334155" stroke-width="1"/>
+    <rect x="695" y="185" width="85"  height="60" fill="rgba(251,191,36,0.18)" stroke="#b48a24" stroke-width="1"/>
+    <rect x="780" y="185" width="100" height="60" fill="#1c232d" stroke="#334155" stroke-width="1"/>
+    <rect x="880" y="185" width="30"  height="60" fill="rgba(94,234,212,0.4)" stroke="#2dd4bf" stroke-width="1"/>
+    <rect x="910" y="185" width="20"  height="60" fill="none" stroke="#475569" stroke-width="1" stroke-dasharray="3 3"/>
+    <text class="tiny" x="567" y="262">sys</text>
+    <text class="tiny" x="622" y="276">tools</text>
+    <text class="tiny" x="672" y="262">mem</text>
+    <text class="tiny" x="737" y="276">rag</text>
+    <text class="tiny" x="830" y="262">history</text>
+    <text class="tiny" x="895" y="276">user</text>
+    <text class="tiny" x="922" y="262">rsv</text>
+    <path class="fb dash" d="M540,292 H700"/>
+    <text class="tinya" x="620" y="306">stable prefix — prompt-cache friendly ordering</text>
+
+    <path class="flow" d="M930,215 C954,215 954,390 838,390" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="610" y="360" width="220" height="60" rx="9"/>
+    <text class="lbl" x="720" y="385">MODEL</text>
+    <text class="sub" x="720" y="402">one flat sequence in, tokens out</text>
+    <text class="tiny" x="395" y="430">the model has no "memory", no "files", no "tools" —</text>
+    <text class="tiny" x="395" y="444">only what survived assembly into this window</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Budget explicitly.</b> Give every source a token allowance and an eviction policy (drop, truncate, summarize). Implicit budgets fail silently at the worst time.</li>
+      <li><b>Order for the cache:</b> stable content (system prompt, tool schemas) first, volatile content last — the prefix stays cacheable across every loop iteration.</li>
+      <li>Reserve headroom for the response. An assembler that fills 100% of the window starves the model's output.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Context rot:</b> stale tool results and dead-end reasoning accumulate in history and steer later steps. Compaction is a correctness feature, not a cost feature.</li>
+      <li>Retrieved chunks and memory compete for the same budget — without priorities, RAG floods out the user's actual question.</li>
+      <li>"Lost in the middle": models attend best to the start and end of the window. Where you place instructions changes whether they're followed.</li>
+    </ul></div>
+  </div>
+</article>
+<div class="part-head" id="part-2"><span class="pn">PART II</span><h2>The Agent Core</h2></div>
+
+<article class="fig" id="fig-04">
+  <div class="fig-head">
+    <span class="fig-no">FIG·04</span>
+    <div>
+      <h3>The agent loop</h3>
+      <p class="fig-lede">An agent is a while-loop around inference: the model reads context, emits either an answer or a tool call, the runtime executes, and the observation is appended back into context. Everything else in this atlas hangs off this cycle.</p>
+    </div>
+    <span class="fig-tag">AGENT CORE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 520" role="img" aria-label="Diagram of the core agent loop: context feeds an LLM forward pass, a decision point routes to final answer or to parse, execute tool, observation, and back into context">
+    <rect class="nd" x="120" y="210" width="180" height="72" rx="9"/>
+    <text class="lbl" x="210" y="240">CONTEXT</text>
+    <text class="sub" x="210" y="258">system + turns + observations</text>
+    <path class="ctl" d="M210,208 C210,112 300,112 392,112" marker-end="url(#arr-v)"/>
+    <circle class="stepc" cx="300" cy="96" r="8"/><text class="stepn" x="300" y="99">1</text>
+
+    <rect class="nd" x="400" y="80" width="190" height="64" rx="9"/>
+    <text class="lbl" x="495" y="104">LLM FORWARD PASS</text>
+    <text class="sub" x="495" y="122">decide the next action</text>
+    <text class="tiny" x="495" y="162">one inference per loop step</text>
+    <path class="ctl" d="M590,112 H642" marker-end="url(#arr-v)"/>
+    <circle class="stepc" cx="616" cy="96" r="8"/><text class="stepn" x="616" y="99">2</text>
+
+    <polygon class="nd-v" points="650,112 730,74 810,112 730,150"/>
+    <text class="lbl2" x="730" y="116">TOOL CALL?</text>
+
+    <path class="flow" d="M810,112 C845,112 870,110 878,104" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="838" y="136">no more actions</text>
+    <rect class="nd-t" x="820" y="40" width="130" height="60" rx="9"/>
+    <text class="lbl2" x="885" y="64">FINAL ANSWER</text>
+    <text class="sub" x="885" y="80">stop: end_turn</text>
+
+    <path class="ctl" d="M730,150 V224" marker-end="url(#arr-v)"/>
+    <text class="tinyv" x="775" y="192">tool call emitted</text>
+    <circle class="stepc" cx="700" cy="190" r="8"/><text class="stepn" x="700" y="193">3</text>
+    <rect class="nd" x="645" y="230" width="170" height="56" rx="8"/>
+    <text class="lbl2" x="730" y="251">PARSE + VALIDATE</text>
+    <text class="sub" x="730" y="268">schema check (FIG·05)</text>
+
+    <path class="ctl" d="M730,286 V324" marker-end="url(#arr-v)"/>
+    <circle class="stepc" cx="752" cy="306" r="8"/><text class="stepn" x="752" y="309">4</text>
+    <rect class="nd" x="645" y="330" width="170" height="56" rx="8"/>
+    <text class="lbl2" x="730" y="351">EXECUTE TOOL</text>
+    <text class="sub" x="730" y="368">sandboxed side-effects</text>
+
+    <path class="ctl" d="M645,358 C560,358 560,428 578,428" marker-end="url(#arr-v)"/>
+    <circle class="stepc" cx="562" cy="390" r="8"/><text class="stepn" x="562" y="393">5</text>
+    <rect class="nd" x="380" y="400" width="190" height="56" rx="8"/>
+    <text class="lbl2" x="475" y="421">OBSERVATION</text>
+    <text class="sub" x="475" y="438">result appended as message</text>
+
+    <path class="ctl" d="M380,428 C290,428 210,372 210,288" marker-end="url(#arr-v)"/>
+    <circle class="stepc" cx="268" cy="408" r="8"/><text class="stepn" x="268" y="411">6</text>
+    <text class="tinyv" x="210" y="316">loop — context grows</text>
+    <text class="tinyv" x="210" y="328">every iteration</text>
+
+    <rect class="ghost" x="760" y="400" width="180" height="100" rx="9"/>
+    <text class="capm" x="775" y="422">TERMINATION</text>
+    <text class="tiny ta-s" x="775" y="440">max turns / token budget</text>
+    <text class="tiny ta-s" x="775" y="454">model stops calling tools</text>
+    <text class="tiny ta-s" x="775" y="468">user interrupt</text>
+    <text class="tiny ta-s" x="775" y="482">no-progress detector</text>
+    <path class="mut dash" d="M812,124 C880,170 852,330 850,394" marker-end="url(#arr-m)"/>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>The model proposes, the runtime disposes.</b> Steps 4–5 are ordinary deterministic code — this is where permissions, sandboxing, retries, and logging live, because it's the only place they <em>can</em> live.</li>
+      <li>The loop is <b>stateless per step</b>: nothing persists between iterations except what's written into context. Design the observation format as carefully as the prompt.</li>
+      <li>Always bound the loop (turns, tokens, wall-clock). "The model will stop eventually" is not a termination condition.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Doom loops:</b> same tool, same args, same failure, forever. Detect repeated (tool, args) signatures and break the cycle with an error or escalation.</li>
+      <li>Growing context shifts behavior: step 30 sees a very different window than step 2. Long-horizon evals must measure late-loop quality, not just first-turn quality.</li>
+      <li>Silent tool failures that return empty-but-valid results teach the model false beliefs it acts on three steps later.</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-05">
+  <div class="fig-head">
+    <span class="fig-no">FIG·05</span>
+    <div>
+      <h3>Anatomy of a tool call</h3>
+      <p class="fig-lede">Sequence view of a single tool invocation. The model only ever emits text; seven runtime steps turn that text into a validated, permissioned, executed side-effect — and back into tokens.</p>
+    </div>
+    <span class="fig-tag">AGENT CORE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 560" role="img" aria-label="Sequence diagram of one tool call between the model, the runtime, and the external tool, including validation, policy check, dispatch, and result append">
+    <rect class="nd" x="125" y="24" width="150" height="44" rx="8"/>
+    <text class="lbl2" x="200" y="44">MODEL</text>
+    <text class="sub" x="200" y="59">emits tokens</text>
+    <rect class="nd-v" x="405" y="24" width="150" height="44" rx="8"/>
+    <text class="lbl2" x="480" y="44">RUNTIME</text>
+    <text class="sub" x="480" y="59">the agent harness</text>
+    <rect class="nd" x="705" y="24" width="150" height="44" rx="8"/>
+    <text class="lbl2" x="780" y="44">TOOL</text>
+    <text class="sub" x="780" y="59">API · DB · shell</text>
+    <path class="mut dash" d="M200,68 V535"/>
+    <path class="mut dash" d="M480,68 V535"/>
+    <path class="mut dash" d="M780,68 V535"/>
+
+    <circle class="stepc" cx="40" cy="120" r="8"/><text class="stepn" x="40" y="123">1</text>
+    <path class="ctl" d="M474,120 H208" marker-end="url(#arr-v)"/>
+    <text class="tinyv" x="340" y="108">tool schemas + system prompt in context</text>
+
+    <circle class="stepc" cx="40" cy="170" r="8"/><text class="stepn" x="40" y="173">2</text>
+    <path class="flow" d="M206,170 H474" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="340" y="158">{"name":"search_repos","args":{"q":"…"}}</text>
+
+    <circle class="stepc" cx="40" cy="216" r="8"/><text class="stepn" x="40" y="219">3</text>
+    <rect class="nd" x="420" y="196" width="120" height="40" rx="7"/>
+    <text class="sub" x="480" y="213">validate args</text>
+    <text class="tiny" x="480" y="227">against JSON Schema</text>
+    <path class="err dash" d="M418,216 C330,216 300,226 208,226" marker-end="url(#arr-e)"/>
+    <text class="tinye" x="318" y="244">invalid → error fed back, model re-emits</text>
+
+    <circle class="stepc" cx="40" cy="282" r="8"/><text class="stepn" x="40" y="285">4</text>
+    <rect class="nd-a" x="420" y="262" width="120" height="40" rx="7"/>
+    <text class="sub" x="480" y="279">policy check</text>
+    <text class="tiny" x="480" y="293">allow · ask · deny</text>
+
+    <circle class="stepc" cx="40" cy="330" r="8"/><text class="stepn" x="40" y="333">5</text>
+    <path class="flow" d="M486,330 H774" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="630" y="318">dispatch handler(args) — timeout · idempotency key</text>
+
+    <circle class="stepc" cx="40" cy="390" r="8"/><text class="stepn" x="40" y="393">6</text>
+    <path class="flow" d="M774,390 H486" marker-end="url(#arr-t)"/>
+    <text class="tiny" x="630" y="378">result | error — serialized, truncated to budget</text>
+
+    <circle class="stepc" cx="40" cy="450" r="8"/><text class="stepn" x="40" y="453">7</text>
+    <path class="ctl" d="M474,450 H208" marker-end="url(#arr-v)"/>
+    <text class="tinyv" x="340" y="438">tool_result appended → next forward pass</text>
+
+    <text class="tiny" x="480" y="512">the model never executes anything —</text>
+    <text class="tiny" x="480" y="526">it emits text the runtime chooses to act on</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Schema design is prompt design:</b> the tool's name, description, and parameter names are read by the model as instructions. Vague schemas produce vague calls.</li>
+      <li>Validate <em>before</em> permission-check, and feed validation errors back verbatim (step 3) — models self-correct malformed args reliably when shown the error.</li>
+      <li><b>Truncate results deliberately</b> (step 6): a 2MB JSON response is a context-window attack from your own database.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li>Tool results are <b>untrusted input</b>: a scraped webpage or ticket body can carry prompt-injection that the model reads as instructions on step 7.</li>
+      <li>Non-idempotent handlers + retries = duplicate side-effects. Every mutating tool needs an idempotency key.</li>
+      <li>Timeouts that kill the handler but not the side-effect leave the world changed while the model believes the call failed.</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-06">
+  <div class="fig-head">
+    <span class="fig-no">FIG·06</span>
+    <div>
+      <h3>MCP — the integration bus</h3>
+      <p class="fig-lede">The Model Context Protocol turns M×N custom integrations into M+N: one host runs one client per server over JSON-RPC, and every server exposes the same three primitives — tools, resources, prompts.</p>
+    </div>
+    <span class="fig-tag">AGENT CORE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 440" role="img" aria-label="Diagram of Model Context Protocol architecture: a host with an agent loop and per-server MCP clients connected over stdio and streamable HTTP transports to MCP servers exposing tools, resources and prompts">
+    <rect class="grp" x="20" y="40" width="300" height="330" rx="10"/>
+    <text class="cap" x="34" y="60">HOST — AGENT RUNTIME</text>
+    <rect class="nd" x="40" y="80" width="200" height="56" rx="8"/>
+    <text class="lbl2" x="140" y="101">AGENT LOOP</text>
+    <text class="sub" x="140" y="117">FIG·04</text>
+    <path class="ctl" d="M140,136 V174" marker-end="url(#arr-v)"/>
+    <path class="ctl" d="M100,136 C68,170 68,230 100,254" marker-end="url(#arr-v)"/>
+    <rect class="nd-v" x="40" y="180" width="200" height="50" rx="8"/>
+    <text class="lbl2" x="140" y="200">MCP CLIENT</text>
+    <text class="sub" x="140" y="215">session A</text>
+    <rect class="nd-v" x="40" y="260" width="200" height="50" rx="8"/>
+    <text class="lbl2" x="140" y="280">MCP CLIENT</text>
+    <text class="sub" x="140" y="295">session B</text>
+    <text class="tiny" x="140" y="338">one client per server —</text>
+    <text class="tiny" x="140" y="351">isolated, stateful sessions</text>
+
+    <path class="flow" d="M240,205 C400,205 400,120 552,120" marker-end="url(#arr-t)"/>
+    <text class="tinya" x="400" y="134">initialize → capability negotiation</text>
+    <text class="tinyt" x="400" y="152">stdio — local process</text>
+    <path class="flow" d="M240,285 C400,285 400,310 552,310" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="400" y="272">streamable HTTP — remote · OAuth</text>
+    <text class="tiny" x="400" y="392">every transport speaks JSON-RPC 2.0 —</text>
+    <text class="tiny" x="400" y="405">requests, responses, notifications</text>
+
+    <rect class="grp" x="560" y="50" width="380" height="140" rx="10"/>
+    <text class="cap" x="574" y="70">MCP SERVER — FILESYSTEM (LOCAL)</text>
+    <rect class="nd" x="580" y="92" width="110" height="44" rx="7"/>
+    <text class="lbl2" x="635" y="118">TOOLS</text>
+    <rect class="nd" x="700" y="92" width="110" height="44" rx="7"/>
+    <text class="lbl2" x="755" y="118">RESOURCES</text>
+    <rect class="nd" x="820" y="92" width="104" height="44" rx="7"/>
+    <text class="lbl2" x="872" y="118">PROMPTS</text>
+    <text class="tiny" x="635" y="156">list · call</text>
+    <text class="tiny" x="755" y="156">read · subscribe</text>
+    <text class="tiny" x="872" y="156">templates</text>
+
+    <rect class="grp" x="560" y="240" width="380" height="140" rx="10"/>
+    <text class="cap" x="574" y="260">MCP SERVER — GITHUB (REMOTE)</text>
+    <rect class="nd" x="580" y="282" width="110" height="44" rx="7"/>
+    <text class="lbl2" x="635" y="308">TOOLS</text>
+    <rect class="nd" x="700" y="282" width="110" height="44" rx="7"/>
+    <text class="lbl2" x="755" y="308">RESOURCES</text>
+    <rect class="nd" x="820" y="282" width="104" height="44" rx="7"/>
+    <text class="lbl2" x="872" y="308">PROMPTS</text>
+    <text class="tiny" x="635" y="346">search · create_pr</text>
+    <text class="tiny" x="755" y="346">repo files</text>
+    <text class="tiny" x="872" y="346">pr_review</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>The protocol is the contract:</b> capability negotiation at <code>initialize</code> means hosts and servers evolve independently — the M×N integration matrix collapses to M+N.</li>
+      <li>Tools are model-controlled, resources are app-controlled, prompts are user-controlled. Choosing the right primitive is an API-design decision, not a naming one.</li>
+      <li>Server tool descriptions enter your context window (FIG·03). Twenty connected servers can spend your budget before the user types a word — lazy-load or search tools instead of front-loading all schemas.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Trust boundary:</b> a third-party MCP server injects text straight into your loop — tool descriptions and results are both injection surfaces. Treat servers like npm dependencies, not like config.</li>
+      <li>Remote servers add OAuth, network partitions, and version skew to what used to be a local function call. Timeouts and degraded modes are part of the design.</li>
+      <li>Two servers exporting similarly-named tools (<code>search</code>, <code>query</code>) make the model's tool choice ambiguous — namespace or curate.</li>
+    </ul></div>
+  </div>
+</article>
+<article class="fig" id="fig-07">
+  <div class="fig-head">
+    <span class="fig-no">FIG·07</span>
+    <div>
+      <h3>The RAG pipeline, both lanes</h3>
+      <p class="fig-lede">Retrieval is two pipelines that must agree: an offline lane that turns documents into an index, and an online lane that turns a query into the handful of chunks worth spending context on.</p>
+    </div>
+    <span class="fig-tag">AGENT CORE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 460" role="img" aria-label="Diagram of retrieval-augmented generation with an offline ingest lane from sources through parsing, chunking, embedding into a vector index, and an online query lane through hybrid search and reranking into top chunks for the context assembler">
+    <rect class="grp" x="20" y="30" width="920" height="170" rx="10"/>
+    <text class="cap" x="34" y="50">INGEST — OFFLINE PIPELINE</text>
+    <rect class="nd" x="40" y="75" width="130" height="56" rx="8"/>
+    <text class="lbl2" x="105" y="96">SOURCES</text>
+    <text class="sub" x="105" y="112">docs · wikis · tickets</text>
+    <path class="flow" d="M170,103 H198" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="205" y="75" width="140" height="56" rx="8"/>
+    <text class="lbl2" x="275" y="96">PARSE + CLEAN</text>
+    <text class="sub" x="275" y="112">strip boilerplate</text>
+    <path class="flow" d="M345,103 H373" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="380" y="75" width="130" height="56" rx="8"/>
+    <text class="lbl2" x="445" y="96">CHUNK</text>
+    <text class="sub" x="445" y="112">size · overlap</text>
+    <path class="flow" d="M510,103 H538" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="545" y="75" width="140" height="56" rx="8"/>
+    <text class="lbl2" x="615" y="96">EMBED</text>
+    <text class="sub" x="615" y="112">vector per chunk</text>
+    <path class="flow" d="M685,103 H713" marker-end="url(#arr-t)"/>
+    <rect class="nd-a" x="720" y="75" width="200" height="56" rx="8"/>
+    <text class="lbl2" x="820" y="96">VECTOR INDEX</text>
+    <text class="sub" x="820" y="112">ANN + metadata</text>
+    <text class="tiny" x="820" y="160">re-embed on updates · versioned index</text>
+
+    <path class="fb dash" d="M820,131 C820,220 455,215 455,281" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="645" y="226">ANN lookup at query time</text>
+
+    <rect class="grp" x="20" y="240" width="920" height="215" rx="10"/>
+    <text class="cap" x="34" y="260">QUERY — ONLINE, PER AGENT STEP</text>
+    <rect class="nd" x="40" y="285" width="130" height="56" rx="8"/>
+    <text class="lbl2" x="105" y="306">QUERY</text>
+    <text class="sub" x="105" y="322">often a tool call</text>
+    <path class="flow" d="M170,313 H198" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="205" y="285" width="130" height="56" rx="8"/>
+    <text class="lbl2" x="270" y="306">EMBED</text>
+    <text class="sub" x="270" y="322">same model as ingest</text>
+    <path class="flow" d="M335,313 H363" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="370" y="285" width="170" height="56" rx="8"/>
+    <text class="lbl2" x="455" y="306">HYBRID SEARCH</text>
+    <text class="sub" x="455" y="322">ANN + BM25 · filters</text>
+    <path class="flow" d="M540,313 H568" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="575" y="285" width="150" height="56" rx="8"/>
+    <text class="lbl2" x="650" y="306">RERANK</text>
+    <text class="sub" x="650" y="322">cross-encoder</text>
+    <path class="flow" d="M725,313 H753" marker-end="url(#arr-t)"/>
+    <rect class="nd-t" x="760" y="285" width="160" height="56" rx="8"/>
+    <text class="lbl2" x="840" y="306">TOP-K CHUNKS</text>
+    <text class="sub" x="840" y="322">scored · cited</text>
+    <path class="flow" d="M840,341 V384" marker-end="url(#arr-t)"/>
+    <rect class="ghost" x="640" y="390" width="280" height="50" rx="8"/>
+    <text class="sub" x="780" y="410">→ CONTEXT ASSEMBLER (FIG·03)</text>
+    <text class="tiny" x="780" y="425">budgeted like every other source</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>In agentic systems, retrieval is usually a tool</b> the model calls with its own rewritten query — often several times with refinements — not a one-shot pre-step bolted before the prompt.</li>
+      <li>Hybrid beats pure-vector in practice: embeddings miss exact identifiers (error codes, SKUs, names) that BM25 catches trivially.</li>
+      <li>The reranker is the cheapest quality win in the stack: retrieve 50 loosely, keep the 5 a cross-encoder actually scores as relevant.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Ingest/query drift:</b> change the embedding model or chunking policy without re-indexing and retrieval quietly degrades — version the index like a schema.</li>
+      <li>Retrieval quality is invisible without its own eval: measure recall@k against a labeled set, or you'll debug "hallucinations" that are really retrieval misses.</li>
+      <li>Chunk boundaries that split tables, code blocks, or definitions hand the model half-facts it will confidently complete.</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-08">
+  <div class="fig-head">
+    <span class="fig-no">FIG·08</span>
+    <div>
+      <h3>Memory architecture</h3>
+      <p class="fig-lede">"Memory" is three different stores plus a discipline: the volatile working context, persistent episodic/semantic/procedural stores, an async reflection process that writes back — and compaction keeping the window alive.</p>
+    </div>
+    <span class="fig-tag">AGENT CORE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 400" role="img" aria-label="Diagram of agent memory: agent loop exchanges with working context, reflection distills turns into episodic, semantic and procedural stores, which are recalled back into context at turn start; compaction summarizes when near the token budget">
+    <rect class="nd" x="40" y="80" width="190" height="80" rx="9"/>
+    <text class="lbl" x="135" y="112">AGENT LOOP</text>
+    <text class="sub" x="135" y="130">reads · writes turns</text>
+    <path class="flow" d="M230,105 H354" marker-end="url(#arr-t)"/>
+    <path class="flow" d="M352,135 H234" marker-end="url(#arr-t)"/>
+
+    <rect class="nd-v" x="360" y="70" width="240" height="100" rx="10"/>
+    <text class="lbl" x="480" y="105">WORKING CONTEXT</text>
+    <text class="sub" x="480" y="124">volatile · token-bounded</text>
+    <text class="sub" x="480" y="139">= the context window</text>
+    <path class="ctl dash" d="M420,68 C405,30 555,30 540,68" marker-end="url(#arr-v)"/>
+    <text class="tinyv" x="480" y="20">near budget → summarize oldest, evict (compaction)</text>
+
+    <path class="fb" d="M480,172 V274" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="437" y="225">distill turns</text>
+    <rect class="nd-a" x="390" y="280" width="220" height="70" rx="9"/>
+    <text class="lbl2" x="500" y="305">REFLECTION</text>
+    <text class="sub" x="500" y="321">extract · dedupe · update</text>
+    <text class="tiny" x="500" y="337">runs async, end of turn</text>
+
+    <rect class="grp" x="680" y="40" width="260" height="320" rx="10"/>
+    <text class="cap" x="694" y="60">PERSISTENT STORES</text>
+    <rect class="nd" x="700" y="80" width="220" height="56" rx="8"/>
+    <text class="lbl2" x="810" y="101">EPISODIC</text>
+    <text class="sub" x="810" y="117">session transcripts</text>
+    <rect class="nd" x="700" y="160" width="220" height="56" rx="8"/>
+    <text class="lbl2" x="810" y="181">SEMANTIC</text>
+    <text class="sub" x="810" y="197">facts · preferences</text>
+    <rect class="nd" x="700" y="240" width="220" height="56" rx="8"/>
+    <text class="lbl2" x="810" y="261">PROCEDURAL</text>
+    <text class="sub" x="810" y="277">skills · playbooks</text>
+    <text class="tiny" x="810" y="330">plain files or DB —</text>
+    <text class="tiny" x="810" y="343">survives the session</text>
+
+    <path class="fb dash" d="M610,300 C655,300 655,120 696,120" marker-end="url(#arr-a)"/>
+    <path class="fb dash" d="M610,315 C660,315 660,200 696,200" marker-end="url(#arr-a)"/>
+    <path class="fb dash" d="M610,330 C660,330 660,280 696,280" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="640" y="356">write-back</text>
+
+    <path class="flow dash" d="M700,96 C650,96 650,88 606,88" marker-end="url(#arr-t)"/>
+    <path class="flow dash" d="M700,176 C645,176 645,115 606,115" marker-end="url(#arr-t)"/>
+    <path class="flow dash" d="M700,256 C635,256 635,145 606,145" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="648" y="66">recall at turn start — relevance-scored</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Working context is not memory</b> — it's a cache with brutal eviction. Anything worth keeping must be explicitly written somewhere persistent before compaction eats it.</li>
+      <li>Split by type because access patterns differ: episodic is append-only and searched rarely; semantic is small, hot, and loaded every session; procedural changes agent <em>behavior</em> and deserves review like code.</li>
+      <li>Reflection runs off the critical path — an agent that pauses mid-task to journal is spending the user's latency on its own bookkeeping.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Memory poisoning:</b> one wrong extracted "fact" gets recalled into every future session and compounds. Memories need provenance and an expiry/correction path.</li>
+      <li>Recall is retrieval (FIG·07) with the same failure modes — irrelevant memories in context are worse than none, they masquerade as ground truth.</li>
+      <li>Compaction summaries silently drop the detail that mattered ("port 5433, not 5432"). Summarize with a schema, not freeform prose.</li>
+    </ul></div>
+  </div>
+</article>
+<div class="part-head" id="part-3"><span class="pn">PART III</span><h2>Scale &amp; Safety</h2></div>
+
+<article class="fig" id="fig-09">
+  <div class="fig-head">
+    <span class="fig-no">FIG·09</span>
+    <div>
+      <h3>Multi-agent orchestration</h3>
+      <p class="fig-lede">When one context window can't hold the job: an orchestrator decomposes work into typed tasks, isolated workers execute in parallel, and a critic gates what the synthesizer is allowed to merge.</p>
+    </div>
+    <span class="fig-tag">SCALE</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 550" role="img" aria-label="Diagram of multi-agent orchestration: an orchestrator feeds a task queue fanning out to three isolated workers, whose results pass a critic verifier before a synthesizer merges the final answer; a shared artifact store and a reject-requeue path are shown">
+    <rect class="nd-v" x="380" y="30" width="220" height="70" rx="10"/>
+    <text class="lbl" x="490" y="58">ORCHESTRATOR</text>
+    <text class="sub" x="490" y="76">plan · decompose · route</text>
+    <path class="ctl" d="M490,100 V132" marker-end="url(#arr-v)"/>
+    <rect class="nd" x="390" y="138" width="200" height="50" rx="8"/>
+    <text class="lbl2" x="490" y="158">TASK QUEUE</text>
+    <text class="sub" x="490" y="173">typed task specs</text>
+
+    <path class="ctl" d="M420,188 C300,210 240,220 218,244" marker-end="url(#arr-v)"/>
+    <path class="ctl" d="M490,188 V244" marker-end="url(#arr-v)"/>
+    <path class="ctl" d="M560,188 C680,210 740,220 748,244" marker-end="url(#arr-v)"/>
+
+    <rect class="nd" x="100" y="250" width="220" height="90" rx="9"/>
+    <text class="lbl2" x="210" y="278">WORKER A</text>
+    <text class="sub" x="210" y="294">own context · own tools</text>
+    <text class="tiny" x="210" y="322">research subtask</text>
+    <rect class="nd" x="370" y="250" width="220" height="90" rx="9"/>
+    <text class="lbl2" x="480" y="278">WORKER B</text>
+    <text class="sub" x="480" y="294">own context · own tools</text>
+    <text class="tiny" x="480" y="322">code subtask</text>
+    <rect class="nd" x="640" y="250" width="220" height="90" rx="9"/>
+    <text class="lbl2" x="750" y="278">WORKER C</text>
+    <text class="sub" x="750" y="294">own context · own tools</text>
+    <text class="tiny" x="750" y="322">docs subtask</text>
+
+    <path class="flow" d="M210,340 C210,380 300,390 318,398" marker-end="url(#arr-t)"/>
+    <path class="flow" d="M480,340 C480,370 420,380 402,396" marker-end="url(#arr-t)"/>
+    <path class="flow" d="M750,340 C750,390 580,448 464,448" marker-end="url(#arr-t)"/>
+
+    <rect class="nd-a" x="260" y="400" width="200" height="60" rx="9"/>
+    <text class="lbl2" x="360" y="423">CRITIC / VERIFIER</text>
+    <text class="sub" x="360" y="440">checks claims · rejects</text>
+    <path class="err dash" d="M330,398 C260,300 340,230 424,194" marker-end="url(#arr-e)"/>
+    <text class="tinye" x="288" y="288">reject → requeue</text>
+
+    <path class="flow" d="M460,418 H534" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="540" y="400" width="200" height="60" rx="9"/>
+    <text class="lbl2" x="640" y="423">SYNTHESIZER</text>
+    <text class="sub" x="640" y="440">merge → final answer</text>
+    <path class="flow" d="M640,460 V486" marker-end="url(#arr-t)"/>
+    <rect class="nd-t" x="550" y="490" width="180" height="42" rx="8"/>
+    <text class="lbl2" x="640" y="515">FINAL ANSWER</text>
+
+    <rect class="ghost" x="40" y="420" width="180" height="70" rx="9"/>
+    <text class="sub" x="130" y="448">ARTIFACT STORE</text>
+    <text class="tiny" x="130" y="463">files · scratch dirs</text>
+    <path class="mut dash" d="M140,340 C130,370 130,390 130,414" marker-end="url(#arr-m)"/>
+    <text class="tiny" x="130" y="480">share work, not context</text>
+
+    <text class="tiny" x="810" y="480">contexts are isolated —</text>
+    <text class="tiny" x="810" y="494">agents exchange messages, not memory</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Decompose by context, not by org chart.</b> A subtask is worth a worker when it needs tokens the parent can't spare — not because "reviewer" sounds like a job title.</li>
+      <li>Task specs are the API: each worker gets a self-contained brief and returns structured results. If a worker needs to ask questions, the decomposition failed.</li>
+      <li>Fan-out multiplies cost linearly and error rate combinatorially — the critic exists because merging three unverified outputs compounds their mistakes.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Telephone-game loss:</b> every hop between agents drops detail. Pass artifacts (files, diffs, data) rather than summaries of summaries.</li>
+      <li>Two workers editing shared state concurrently — isolate write surfaces (per-worker worktrees) or serialize the writes.</li>
+      <li>Orchestrators that trust worker self-reports: "done ✓" from a worker is a claim, not a fact. Verification is the orchestrator's job.</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-10">
+  <div class="fig-head">
+    <span class="fig-no">FIG·10</span>
+    <div>
+      <h3>Guardrails &amp; the human-in-the-loop</h3>
+      <p class="fig-lede">Safety as a pipeline position, not a vibe: screen inputs, classify every proposed action by blast radius, auto-run only the reversible, gate the mutating on a human, and filter what leaves.</p>
+    </div>
+    <span class="fig-tag">SAFETY</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 400" role="img" aria-label="Diagram of a guardrail pipeline: user input is screened, the agent proposes an action, a policy engine routes it by tier to auto-execute, human approval, or blocked, and results pass an output filter back to the user">
+    <rect class="nd" x="20" y="60" width="120" height="56" rx="8"/>
+    <text class="lbl" x="80" y="81">USER</text>
+    <text class="sub" x="80" y="98">request</text>
+    <path class="flow" d="M140,88 H174" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="180" y="60" width="160" height="56" rx="8"/>
+    <text class="lbl" x="260" y="81">INPUT SCREEN</text>
+    <text class="sub" x="260" y="98">injection · PII</text>
+    <path class="flow" d="M340,88 H374" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="380" y="60" width="150" height="56" rx="8"/>
+    <text class="lbl" x="455" y="81">AGENT CORE</text>
+    <text class="sub" x="455" y="98">FIG·04</text>
+    <path class="flow" d="M530,88 H564" marker-end="url(#arr-t)"/>
+    <rect class="nd-v" x="570" y="60" width="180" height="56" rx="8"/>
+    <text class="lbl" x="660" y="81">PROPOSED ACTION</text>
+    <text class="sub" x="660" y="98">tool call, not yet run</text>
+
+    <path class="ctl" d="M660,116 V164" marker-end="url(#arr-v)"/>
+    <rect class="nd-a" x="570" y="170" width="180" height="64" rx="9"/>
+    <text class="lbl" x="660" y="196">POLICY ENGINE</text>
+    <text class="sub" x="660" y="214">classify blast radius</text>
+
+    <text class="tinyt" x="860" y="160">tier 0 — read-only → auto-run</text>
+    <path class="flow" d="M750,202 H774" marker-end="url(#arr-t)"/>
+    <rect class="nd-t" x="780" y="170" width="160" height="64" rx="9"/>
+    <text class="lbl" x="860" y="196">EXECUTE</text>
+    <text class="sub" x="860" y="214">in sandbox</text>
+
+    <path class="fb" d="M700,234 C700,310 720,310 774,310" marker-end="url(#arr-a)"/>
+    <rect class="nd-a" x="780" y="280" width="160" height="60" rx="9"/>
+    <text class="lbl2" x="860" y="304">HUMAN GATE</text>
+    <text class="sub" x="860" y="320">review · approve</text>
+    <text class="tinya" x="860" y="364">tier 1 — mutating → human approves</text>
+    <path class="flow dash" d="M860,278 V240" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="892" y="262">ok</text>
+
+    <path class="err" d="M620,234 C600,262 592,272 592,294" marker-end="url(#arr-e)"/>
+    <text class="tinye" x="470" y="274">tier 2 — destructive → deny</text>
+    <rect class="nd-e" x="520" y="300" width="190" height="50" rx="8"/>
+    <text class="lbl2" x="615" y="321">BLOCKED</text>
+    <text class="sub" x="615" y="337">returned as error to model</text>
+
+    <path class="flow dash" d="M860,168 V30 H80 V54" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="700" y="22">result</text>
+    <rect class="nd" x="400" y="10" width="180" height="40" rx="8"/>
+    <text class="sub" x="490" y="27">OUTPUT FILTER</text>
+    <text class="tiny" x="490" y="41">secrets · PII · claims</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Gate actions, not conversations.</b> The reviewable unit is the proposed tool call with its exact arguments — a diff, a query, a recipient list — not a chat transcript.</li>
+      <li>Tier by reversibility: reads auto-run, reversible writes get logged, irreversible or outward-facing actions (send, delete, pay, deploy) get a human. Encode this in the policy engine, not in the prompt.</li>
+      <li>Ration the human's attention: if the gate fires on everything, approvals become rubber stamps within a week. Tight tiers keep review meaningful.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Prompt-level guardrails alone:</b> "never delete data" in the system prompt is a suggestion; the policy engine's deny is enforcement. Injected instructions can beat the former, not the latter.</li>
+      <li>Blocked actions returned as raw refusals cause retry loops — return a structured error the model can plan around.</li>
+      <li>The exfiltration triad: private data + untrusted input + an outbound channel in one agent. If you can't remove a leg, gate the outbound channel.</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-11">
+  <div class="fig-head">
+    <span class="fig-no">FIG·11</span>
+    <div>
+      <h3>Failure modes → recovery, mapped</h3>
+      <p class="fig-lede">The five ways agent runs actually die, each paired with the mechanism that catches it. None of these are exotic — they're distributed-systems patterns pointed at a non-deterministic component.</p>
+    </div>
+    <span class="fig-tag">RELIABILITY</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 560" role="img" aria-label="Table-style diagram mapping five agent failure modes to recovery mechanisms, with a checkpointing strip underneath">
+    <text class="capm" x="120" y="48">FAILURE MODE</text>
+    <text class="capm" x="560" y="48">RECOVERY</text>
+
+    <rect class="nd-e" x="120" y="70" width="300" height="56" rx="8"/>
+    <text class="lbl2" x="270" y="92">PROVIDER ERROR / TIMEOUT</text>
+    <text class="sub" x="270" y="108">429 · 5xx · network</text>
+    <path class="mut" d="M420,98 H554" marker-end="url(#arr-m)"/>
+    <rect class="nd-t" x="560" y="70" width="340" height="56" rx="8"/>
+    <text class="lbl2" x="730" y="92">RETRY + BACKOFF</text>
+    <text class="sub" x="730" y="108">capped attempts · jitter</text>
+
+    <rect class="nd-e" x="120" y="150" width="300" height="56" rx="8"/>
+    <text class="lbl2" x="270" y="172">INVALID TOOL CALL</text>
+    <text class="sub" x="270" y="188">bad args · unknown tool</text>
+    <path class="mut" d="M420,178 H554" marker-end="url(#arr-m)"/>
+    <rect class="nd-t" x="560" y="150" width="340" height="56" rx="8"/>
+    <text class="lbl2" x="730" y="172">ERROR FED BACK TO MODEL</text>
+    <text class="sub" x="730" y="188">it self-corrects (FIG·05)</text>
+
+    <rect class="nd-e" x="120" y="230" width="300" height="56" rx="8"/>
+    <text class="lbl2" x="270" y="252">CONFIDENT WRONG RESULT</text>
+    <text class="sub" x="270" y="268">claims success, isn't</text>
+    <path class="mut" d="M420,258 H554" marker-end="url(#arr-m)"/>
+    <rect class="nd-t" x="560" y="230" width="340" height="56" rx="8"/>
+    <text class="lbl2" x="730" y="252">INDEPENDENT VERIFICATION</text>
+    <text class="sub" x="730" y="268">tests · asserts · judge — never self-report</text>
+
+    <rect class="nd-e" x="120" y="310" width="300" height="56" rx="8"/>
+    <text class="lbl2" x="270" y="332">CONTEXT OVERFLOW</text>
+    <text class="sub" x="270" y="348">window exhausted mid-task</text>
+    <path class="mut" d="M420,338 H554" marker-end="url(#arr-m)"/>
+    <rect class="nd-t" x="560" y="310" width="340" height="56" rx="8"/>
+    <text class="lbl2" x="730" y="332">COMPACTION</text>
+    <text class="sub" x="730" y="348">summarize + evict (FIG·08)</text>
+
+    <rect class="nd-e" x="120" y="390" width="300" height="56" rx="8"/>
+    <text class="lbl2" x="270" y="412">LOOP / NO PROGRESS</text>
+    <text class="sub" x="270" y="428">same call, same args, again</text>
+    <path class="mut" d="M420,418 H554" marker-end="url(#arr-m)"/>
+    <rect class="nd-t" x="560" y="390" width="340" height="56" rx="8"/>
+    <text class="lbl2" x="730" y="412">CIRCUIT BREAKER</text>
+    <text class="sub" x="730" y="428">halt → escalate to human</text>
+
+    <rect class="ghost" x="120" y="480" width="780" height="56" rx="9"/>
+    <text class="sub" x="510" y="502">STATE CHECKPOINTS — resume, don't restart</text>
+    <text class="tiny" x="510" y="518">persist loop state each step · idempotency keys on every side-effect</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Row 3 is the dangerous one.</b> Transport errors announce themselves; a plausible wrong answer doesn't. Budget most of your engineering into verification, not retries.</li>
+      <li>Recovery lives in the runtime, deterministically — asking the model to "please be careful" is not an error-handling strategy.</li>
+      <li>Checkpoint at step boundaries: a 40-step run that dies at step 39 should cost one step to finish, not forty.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li>Retrying a <em>mutating</em> call that half-succeeded — hence idempotency keys before retry policies.</li>
+      <li>Compaction as a recovery can drop the very constraint that caused the failure, so the agent repeats it with a cleaner conscience.</li>
+      <li>Circuit breakers tuned by gut feel: derive thresholds from observed traces (FIG·14), or they'll fire on your best runs and sleep through your worst.</li>
+    </ul></div>
+  </div>
+</article>
+<div class="part-head" id="part-4"><span class="pn">PART IV</span><h2>Evals &amp; Observability</h2></div>
+
+<article class="fig" id="fig-12">
+  <div class="fig-head">
+    <span class="fig-no">FIG·12</span>
+    <div>
+      <h3>The eval harness</h3>
+      <p class="fig-lede">The CI pipeline for a non-deterministic component: golden cases run N times through a sandboxed agent, three kinds of graders score the transcripts, and a regression gate decides what ships. This is the diagram most agent teams build last and need first.</p>
+    </div>
+    <span class="fig-tag">EVALS</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 520" role="img" aria-label="Diagram of an agent eval harness: a golden dataset feeds an eval runner and sandboxed agent under test, transcripts flow to programmatic, LLM-judge and human graders, scores form a scorecard gated in CI, and failures feed back as new cases">
+    <rect class="nd-a" x="30" y="60" width="190" height="80" rx="9"/>
+    <text class="lbl" x="125" y="92">GOLDEN SET</text>
+    <text class="sub" x="125" y="110">task · fixtures · expected</text>
+    <path class="flow" d="M220,100 H258" marker-end="url(#arr-t)"/>
+    <rect class="nd-v" x="265" y="60" width="180" height="80" rx="9"/>
+    <text class="lbl" x="355" y="92">EVAL RUNNER</text>
+    <text class="sub" x="355" y="110">seeded env per trial</text>
+    <path class="flow" d="M445,100 H483" marker-end="url(#arr-t)"/>
+    <text class="tiny" x="464" y="86">×N</text>
+    <rect class="nd" x="490" y="60" width="190" height="80" rx="9"/>
+    <text class="lbl" x="585" y="92">AGENT UNDER TEST</text>
+    <text class="sub" x="585" y="110">sandboxed · pinned config</text>
+    <path class="flow" d="M680,100 H718" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="725" y="60" width="200" height="80" rx="9"/>
+    <text class="lbl" x="825" y="92">TRANSCRIPTS</text>
+    <text class="sub" x="825" y="110">full traces (FIG·14)</text>
+
+    <rect class="ghost" x="30" y="180" width="190" height="56" rx="8"/>
+    <text class="sub" x="125" y="202">TRACE-MINED CASES</text>
+    <text class="tiny" x="125" y="217">from prod failures</text>
+    <path class="fb dash" d="M125,176 V146" marker-end="url(#arr-a)"/>
+
+    <path class="flow" d="M825,140 V206" marker-end="url(#arr-t)"/>
+    <rect class="grp" x="420" y="210" width="510" height="150" rx="10"/>
+    <text class="cap" x="434" y="230">GRADERS</text>
+    <rect class="nd" x="440" y="250" width="150" height="80" rx="8"/>
+    <text class="lbl2" x="515" y="282">PROGRAMMATIC</text>
+    <text class="sub" x="515" y="298">asserts on end state</text>
+    <rect class="nd" x="610" y="250" width="150" height="80" rx="8"/>
+    <text class="lbl2" x="685" y="282">LLM JUDGE</text>
+    <text class="sub" x="685" y="298">rubric (FIG·13)</text>
+    <rect class="nd" x="780" y="250" width="130" height="80" rx="8"/>
+    <text class="lbl2" x="845" y="282">HUMAN</text>
+    <text class="sub" x="845" y="298">5–10% audit</text>
+
+    <path class="fb" d="M515,330 C515,370 590,382 598,396" marker-end="url(#arr-a)"/>
+    <path class="fb" d="M685,330 C685,365 665,378 658,396" marker-end="url(#arr-a)"/>
+    <path class="fb" d="M845,330 C845,372 720,386 708,398" marker-end="url(#arr-a)"/>
+    <rect class="nd-t" x="540" y="400" width="220" height="70" rx="9"/>
+    <text class="lbl" x="650" y="428">SCORECARD</text>
+    <text class="sub" x="650" y="446">per-capability scores</text>
+    <path class="flow" d="M760,435 H794" marker-end="url(#arr-t)"/>
+    <rect class="nd-a" x="800" y="400" width="130" height="70" rx="9"/>
+    <text class="lbl2" x="865" y="428">CI GATE</text>
+    <text class="sub" x="865" y="446">block regressions</text>
+
+    <path class="fb dash" d="M538,435 H125 V240" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="330" y="424">every prod failure becomes a new case</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Run every case N times.</b> One trial of a non-deterministic system is an anecdote. Report <code>pass@k</code> (can it?) and <code>pass^k</code> (does it reliably?) — they answer different product questions.</li>
+      <li>Grade <em>outcomes</em>, not transcripts: assert on the final state of the sandbox — the ticket updated, the test passing, the file correct — not on whether the reasoning "looked right".</li>
+      <li>Start with 20 cases mined from real failures over 500 synthetic ones. Coverage of what actually goes wrong beats volume.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Eval-set overfitting:</b> prompts tuned against the same 50 cases for months are memorizing your test, not improving. Hold out a set that never influences iteration.</li>
+      <li>Unpinned dependencies: if the eval hits live APIs or a drifting model version, score changes don't mean what you think they mean.</li>
+      <li>A single aggregate score hides regressions — capability A improving 10% while capability B silently drops 15% reads as "+2% overall, ship it".</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-13">
+  <div class="fig-head">
+    <span class="fig-no">FIG·13</span>
+    <div>
+      <h3>LLM-as-judge, calibrated</h3>
+      <p class="fig-lede">Using a model to grade a model works — but only as an instrument you've calibrated. The judge gets a rubric, bias controls, and a standing comparison against human labels. An uncalibrated judge is a random-number generator with confidence.</p>
+    </div>
+    <span class="fig-tag">EVALS</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 440" role="img" aria-label="Diagram of a calibrated LLM-as-judge pipeline: transcript, rubric and optional reference feed a judge prompt and judge model producing a structured verdict; bias controls apply to the judge, and human labels close a calibration loop back to the rubric">
+    <rect class="nd" x="30" y="60" width="170" height="56" rx="8"/>
+    <text class="lbl2" x="115" y="81">TRANSCRIPT</text>
+    <text class="sub" x="115" y="97">agent run to grade</text>
+    <rect class="nd-a" x="30" y="140" width="170" height="56" rx="8"/>
+    <text class="lbl2" x="115" y="161">RUBRIC</text>
+    <text class="sub" x="115" y="177">criteria · scale · examples</text>
+    <rect class="ghost" x="30" y="220" width="170" height="50" rx="8"/>
+    <text class="sub" x="115" y="241">REFERENCE ANSWER</text>
+    <text class="tiny" x="115" y="256">optional</text>
+
+    <path class="mut" d="M200,88 C232,88 232,140 254,140" marker-end="url(#arr-m)"/>
+    <path class="mut" d="M200,168 H254" marker-end="url(#arr-m)"/>
+    <path class="mut" d="M200,245 C232,245 232,185 254,185" marker-end="url(#arr-m)"/>
+
+    <rect class="nd-v" x="260" y="120" width="190" height="90" rx="9"/>
+    <text class="lbl" x="355" y="152">JUDGE PROMPT</text>
+    <text class="sub" x="355" y="170">pointwise 1–5</text>
+    <text class="sub" x="355" y="185">or pairwise A/B</text>
+    <path class="flow" d="M450,165 H494" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="500" y="120" width="180" height="90" rx="9"/>
+    <text class="lbl" x="590" y="152">JUDGE MODEL</text>
+    <text class="sub" x="590" y="170">different family</text>
+    <text class="sub" x="590" y="185">than the agent</text>
+    <path class="flow" d="M680,165 H724" marker-end="url(#arr-t)"/>
+    <rect class="nd-t" x="730" y="120" width="200" height="90" rx="9"/>
+    <text class="lbl" x="830" y="152">VERDICT</text>
+    <text class="sub" x="830" y="170">structured JSON:</text>
+    <text class="sub" x="830" y="185">score + rationale</text>
+
+    <rect class="grp" x="260" y="300" width="420" height="110" rx="10"/>
+    <text class="capv" x="274" y="320">BIAS CONTROLS</text>
+    <rect class="nd" x="280" y="340" width="120" height="50" rx="7"/>
+    <text class="sub" x="340" y="361">swap A/B</text>
+    <text class="tiny" x="340" y="376">position bias</text>
+    <rect class="nd" x="415" y="340" width="130" height="50" rx="7"/>
+    <text class="sub" x="480" y="361">k samples, vote</text>
+    <text class="tiny" x="480" y="376">self-consistency</text>
+    <rect class="nd" x="560" y="340" width="105" height="50" rx="7"/>
+    <text class="sub" x="612" y="361">length check</text>
+    <text class="tiny" x="612" y="376">verbosity bias</text>
+    <path class="ctl dash" d="M540,298 C540,255 575,240 582,214" marker-end="url(#arr-v)"/>
+
+    <rect class="nd-a" x="730" y="300" width="200" height="60" rx="9"/>
+    <text class="lbl2" x="830" y="323">HUMAN LABELS</text>
+    <text class="sub" x="830" y="339">double-rated subset</text>
+    <path class="fb dash" d="M830,210 V294" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="873" y="252">compare</text>
+    <path class="fb dash" d="M730,330 C480,285 260,240 206,174" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="440" y="262">agreement (κ) low → refine the rubric</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>The rubric is the spec.</b> Vague criteria ("is it helpful?") produce vibes; behavioral criteria with worked examples ("does it cite the retrieved source for every factual claim?") produce measurements.</li>
+      <li>Pairwise A/B is more reliable than absolute scoring for subtle quality gaps — models are better comparators than raters.</li>
+      <li>Report judge–human agreement (Cohen's κ) alongside every eval result. A judge you haven't measured against humans is itself an unevaluated model.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Self-preference:</b> judges from the same model family rate their sibling's style higher. Cross-family judging or ensembles blunt it.</li>
+      <li>Position and verbosity bias are large enough to flip pairwise conclusions — swap-and-rejudge isn't optional hygiene, it's the measurement.</li>
+      <li>Judge drift: upgrade the judge model and historical scores stop being comparable. Pin the judge per eval-set version, migrate deliberately.</li>
+    </ul></div>
+  </div>
+</article>
+<article class="fig" id="fig-14">
+  <div class="fig-head">
+    <span class="fig-no">FIG·14</span>
+    <div>
+      <h3>The observability plane</h3>
+      <p class="fig-lede">An agent run is a distributed trace: every loop step is a span with token, cost, latency, and status attributes. One collector fans out to debugging, metrics, alerting — and the review queue that feeds your evals.</p>
+    </div>
+    <span class="fig-tag">OBSERVABILITY</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 520" role="img" aria-label="Diagram of agent observability: a trace tree of session, turn, llm.call and tool.call spans flows through an OTel-compatible collector to a trace explorer, metrics, alerts, and transcript sampling that feeds eval datasets">
+    <rect class="grp" x="20" y="40" width="450" height="340" rx="10"/>
+    <text class="cap" x="34" y="60">ONE AGENT RUN — TRACE TREE</text>
+    <rect class="bar" x="40" y="80" width="410" height="30" rx="4"/>
+    <text class="sub ta-s" x="50" y="99">session #a1f3 — 14 turns · 96k tok · $0.42</text>
+    <rect class="bar" x="60" y="122" width="370" height="28" rx="4"/>
+    <text class="sub ta-s" x="70" y="140">turn 3 — "fix the failing deploy"</text>
+    <rect class="nd-t" x="80" y="162" width="330" height="26" rx="4"/>
+    <text class="sub ta-s" x="90" y="179">llm.call — in 12.4k · out 512 · 3.1s · $0.06</text>
+    <rect class="nd-v" x="80" y="198" width="330" height="26" rx="4"/>
+    <text class="sub ta-s" x="90" y="215">tool.call github.search — 840ms · ok</text>
+    <rect class="nd-t" x="80" y="234" width="330" height="26" rx="4"/>
+    <text class="sub ta-s" x="90" y="251">llm.call — in 13.1k · out 388 · 2.4s · $0.05</text>
+    <rect class="nd-e" x="80" y="270" width="330" height="26" rx="4"/>
+    <text class="sub ta-s" x="90" y="287">tool.call deploy.run — timeout ✗</text>
+    <text class="tiny" x="245" y="320">every step is a span, tagged with:</text>
+    <rect class="ghost" x="60" y="332" width="74" height="24" rx="12"/>
+    <text class="tiny" x="97" y="347">tokens</text>
+    <rect class="ghost" x="144" y="332" width="58" height="24" rx="12"/>
+    <text class="tiny" x="173" y="347">cost</text>
+    <rect class="ghost" x="212" y="332" width="70" height="24" rx="12"/>
+    <text class="tiny" x="247" y="347">model</text>
+    <rect class="ghost" x="292" y="332" width="74" height="24" rx="12"/>
+    <text class="tiny" x="329" y="347">latency</text>
+    <rect class="ghost" x="376" y="332" width="88" height="24" rx="12"/>
+    <text class="tiny" x="420" y="347">stop_reason</text>
+
+    <path class="flow" d="M470,210 H514" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="520" y="170" width="150" height="80" rx="9"/>
+    <text class="lbl2" x="595" y="202">COLLECTOR</text>
+    <text class="sub" x="595" y="218">OTel-compatible</text>
+
+    <path class="flow" d="M670,190 C700,190 700,90 714,90" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="720" y="60" width="220" height="60" rx="8"/>
+    <text class="lbl2" x="830" y="83">TRACE EXPLORER</text>
+    <text class="sub" x="830" y="99">step-through debugging</text>
+    <path class="flow" d="M670,205 C700,205 700,190 714,190" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="720" y="160" width="220" height="60" rx="8"/>
+    <text class="lbl2" x="830" y="183">METRICS</text>
+    <text class="sub" x="830" y="199">p95 · $/task · error %</text>
+    <path class="fb" d="M830,222 V254" marker-end="url(#arr-a)"/>
+    <rect class="nd-a" x="720" y="260" width="220" height="60" rx="8"/>
+    <text class="lbl2" x="830" y="283">ALERTS</text>
+    <text class="sub" x="830" y="299">cost spike · failure rate</text>
+    <path class="flow" d="M670,225 C700,225 700,390 714,390" marker-end="url(#arr-t)"/>
+    <rect class="nd" x="720" y="360" width="220" height="60" rx="8"/>
+    <text class="lbl2" x="830" y="383">TRANSCRIPT SAMPLING</text>
+    <text class="sub" x="830" y="399">human review queue</text>
+
+    <text class="tiny" x="245" y="440">you can't eval what you didn't record —</text>
+    <text class="tiny" x="245" y="454">traces are where eval datasets come from</text>
+    <path class="fb dash" d="M780,420 C780,470 730,482 716,482" marker-end="url(#arr-a)"/>
+    <rect class="ghost" x="460" y="460" width="250" height="44" rx="8"/>
+    <text class="sub" x="585" y="480">→ EVAL DATASETS (FIG·12)</text>
+    <text class="tiny" x="585" y="494">mined from sampled traces</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>Trace at the step level, always.</b> Aggregate metrics tell you something regressed; only the span tree tells you it was turn 7, after that one tool timeout, in contexts over 80k tokens.</li>
+      <li>Cost is a first-class metric: $/task and tokens/task catch runaway loops days before the invoice does. Alert on rate-of-change, not absolutes.</li>
+      <li>Use the same trace format in the eval harness (FIG·12) and production — then a failed eval and a failed prod run are debuggable with the same tooling.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>Logging the metadata but not the payloads:</b> latency without prompts and completions can't explain <em>why</em> quality moved. Record content, redact PII at the collector.</li>
+      <li>Sampling only errors: the "successful" runs users quietly abandoned are your biggest quality signal, and error-only sampling never sees them.</li>
+      <li>Traces with no session/user/version dimensions can't answer "did the new prompt help?" — tag every span with the config version that produced it.</li>
+    </ul></div>
+  </div>
+</article>
+
+<article class="fig" id="fig-15">
+  <div class="fig-head">
+    <span class="fig-no">FIG·15</span>
+    <div>
+      <h3>The data flywheel</h3>
+      <p class="fig-lede">The whole atlas, closed into a loop: production produces traces, traces become eval cases, evals gate the next iteration, and the iteration ships back to production. Teams with this loop compound; teams without it guess.</p>
+    </div>
+    <span class="fig-tag">EVALS</span>
+  </div>
+  <div class="svg-wrap">
+  <svg class="diagram" viewBox="0 0 960 560" role="img" aria-label="Circular diagram of the data flywheel: production traffic yields traces and signals, curated into new eval cases, which drive iteration on prompts tools and model, checked by offline evals and gated deploys back into production">
+    <rect class="nd-t" x="390" y="40" width="180" height="60" rx="9"/>
+    <text class="lbl2" x="480" y="63">PRODUCTION</text>
+    <text class="sub" x="480" y="79">real traffic</text>
+
+    <path class="flow" d="M570,80 C660,95 740,110 790,146" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="668" y="96">capture everything</text>
+    <rect class="nd" x="700" y="150" width="220" height="64" rx="9"/>
+    <text class="lbl2" x="810" y="173">TRACES + SIGNALS</text>
+    <text class="sub" x="810" y="189">thumbs · retries · escalations</text>
+
+    <path class="fb" d="M820,214 C838,262 838,310 822,356" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="878" y="290">curate</text>
+    <rect class="nd" x="700" y="360" width="220" height="64" rx="9"/>
+    <text class="lbl2" x="810" y="383">CURATION</text>
+    <text class="sub" x="810" y="399">filter · label · dedupe</text>
+
+    <path class="fb" d="M700,412 C645,455 615,480 576,498" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="640" y="470">failures first</text>
+    <rect class="nd-a" x="390" y="470" width="180" height="60" rx="9"/>
+    <text class="lbl2" x="480" y="493">NEW EVAL CASES</text>
+    <text class="sub" x="480" y="509">the golden set grows</text>
+
+    <path class="fb" d="M390,500 C300,488 230,462 175,430" marker-end="url(#arr-a)"/>
+    <text class="tinya" x="282" y="474">tune against them</text>
+    <rect class="nd" x="40" y="360" width="220" height="64" rx="9"/>
+    <text class="lbl2" x="150" y="383">ITERATE</text>
+    <text class="sub" x="150" y="399">prompts · tools · model</text>
+
+    <path class="ctl" d="M150,360 C132,315 132,262 148,218" marker-end="url(#arr-v)"/>
+    <text class="tinyv" x="92" y="290">candidate change</text>
+    <rect class="nd-a" x="40" y="150" width="220" height="64" rx="9"/>
+    <text class="lbl2" x="150" y="173">OFFLINE EVALS + GATE</text>
+    <text class="sub" x="150" y="189">regression-checked (FIG·12)</text>
+
+    <path class="flow" d="M170,150 C240,105 300,85 384,68" marker-end="url(#arr-t)"/>
+    <text class="tinyt" x="262" y="92">gated deploy</text>
+
+    <text class="lbl" x="480" y="268">THE DATA FLYWHEEL</text>
+    <text class="tiny" x="480" y="292">each turn: better evals → safer iteration →</text>
+    <text class="tiny" x="480" y="306">better agent → richer traces</text>
+  </svg>
+  </div>
+  <div class="fig-notes">
+    <div class="note design"><h4>Design notes</h4><ul>
+      <li><b>The flywheel is the moat.</b> Prompts get copied and models get upgraded, but a curated corpus of your domain's real failure cases — and the harness that runs them — compounds and doesn't transfer.</li>
+      <li>Model upgrades become cheap when the loop exists: swap the model, run the goldens, read the diff. Without it, every upgrade is a leap of faith.</li>
+      <li>Implicit signals (retries, abandons, escalations, edits to agent output) are higher-volume and more honest than thumbs — instrument them first.</li>
+    </ul></div>
+    <div class="note breaks"><h4>What breaks</h4><ul>
+      <li><b>The loop silently opens:</b> traces get sampled, nobody curates, the golden set fossilizes at last quarter's failure modes while the product moved on. Assign the curation rotation like on-call.</li>
+      <li>Curating only complaints skews the eval set toward loud users and rare disasters — sample the mundane middle too.</li>
+      <li>Personal data flowing from prod traces into eval sets without redaction turns your test fixtures into a compliance incident.</li>
+    </ul></div>
+  </div>
+</article>
+
+    </div>
+</div>
+
+<footer>
+    <p>Drawn &amp; written by <a href="/">Laraib Jafri</a> · hand-coded SVG, zero chart libraries · <a href="https://medium.com/@lj." target="_blank" rel="noopener noreferrer">more writing on Medium</a></p>
+</footer>
+
+<script>
+// reveal figures on scroll
+const io = new IntersectionObserver((es) => {
+    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); } });
+}, { threshold: 0.06 });
+document.querySelectorAll('.fig').forEach(f => io.observe(f));
+
+// scrollspy for the figure nav
+const links = [...document.querySelectorAll('.fignav a')];
+const spy = new IntersectionObserver((es) => {
+    es.forEach(e => {
+        if (e.isIntersecting) {
+            links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+        }
+    });
+}, { rootMargin: '-25% 0px -60% 0px' });
+document.querySelectorAll('article.fig[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

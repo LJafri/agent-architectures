@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI — The 5-Minute Speedrun</title>
+<meta name="description" content="The whole agentic AI atlas in 15 flash cards. One idea per card, one thing to remember. Built for short attention spans.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --teal:#5eead4; --violet:#a78bfa; --amber:#fbbf24; --red:#f87171;
+  --bg:#0c0f14; --card:#151b23; --line:#1e293b; --line2:#334155;
+  --on:#f1f5f9; --dim:#94a3b8; --mute:#64748b;
+  --mono:'JetBrains Mono',monospace; --body:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body); color:var(--on); background:var(--bg);
+  background-image:linear-gradient(rgba(148,163,184,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,163,184,.035) 1px,transparent 1px);
+  background-size:36px 36px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--teal);text-decoration:none}
+
+/* sticky progress */
+.progress{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(12,15,20,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:.7rem 1.2rem;display:flex;align-items:center;gap:1rem}
+.progress .label{font-family:var(--mono);font-size:.72rem;color:var(--dim);white-space:nowrap}
+.progress .label b{color:var(--teal)}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--violet));border-radius:99px;transition:width .35s ease}
+.progress .full{font-family:var(--mono);font-size:.72rem;color:var(--mute);border:1px solid var(--line2);border-radius:99px;padding:.25rem .7rem;white-space:nowrap}
+.progress .full:hover{color:var(--teal);border-color:var(--teal)}
+
+/* hero */
+.hero{max-width:760px;margin:0 auto;padding:6.5rem 1.4rem 2.2rem;text-align:center}
+.hero .over{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.22em;color:var(--teal);text-transform:uppercase}
+.hero h1{font-size:clamp(2rem,6vw,3.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:.8rem 0}
+.hero h1 em{font-style:normal;color:var(--teal)}
+.hero p{color:var(--dim);max-width:46ch;margin:0 auto}
+.hero .rule{margin-top:1.6rem;display:inline-block;font-family:var(--mono);font-size:.8rem;color:var(--on);border:1px dashed var(--line2);border-radius:12px;padding:.8rem 1.2rem;background:rgba(21,27,35,.6)}
+.hero .rule b{color:var(--violet)}
+
+/* cards */
+.deck{max-width:760px;margin:0 auto;padding:1rem 1.2rem 3rem}
+.card{
+  border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(21,27,35,.85),rgba(15,20,25,.95));
+  padding:1.5rem 1.5rem 1.3rem;margin:0 0 1.1rem;position:relative;
+  transition:border-color .2s, opacity .2s;
+}
+.card.done{border-color:rgba(94,234,212,.45)}
+.card.done .num{background:var(--teal);color:#0c0f14}
+.card .top{display:flex;align-items:center;gap:.85rem;margin-bottom:.55rem}
+.num{font-family:var(--mono);font-weight:700;font-size:.8rem;color:var(--teal);border:1px solid rgba(94,234,212,.5);border-radius:9px;padding:.3rem .55rem;transition:all .2s}
+.card h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;flex:1}
+.check{appearance:none;width:26px;height:26px;border:2px solid var(--line2);border-radius:8px;cursor:pointer;position:relative;flex-shrink:0;transition:all .15s}
+.check:hover{border-color:var(--teal)}
+.check:checked{background:var(--teal);border-color:var(--teal)}
+.check:checked::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#0c0f14;font-weight:800;font-size:.95rem}
+.card .what{color:var(--dim);font-size:.95rem;max-width:58ch}
+.card .what b{color:var(--on)}
+
+/* flow strip */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem;margin:.95rem 0;font-family:var(--mono);font-size:.74rem}
+.n{border:1px solid var(--line2);background:#10161d;color:var(--on);border-radius:8px;padding:.32rem .6rem;white-space:nowrap}
+.n.t{border-color:#2dd4bf;background:rgba(94,234,212,.09)}
+.n.v{border-color:#8b5cf6;background:rgba(167,139,250,.10)}
+.n.a{border-color:#b48a24;background:rgba(251,191,36,.09)}
+.n.r{border-color:#b45555;background:rgba(248,113,113,.08)}
+.ar{color:var(--mute)} .ar.t{color:var(--teal)} .ar.v{color:var(--violet)} .ar.a{color:var(--amber)} .ar.r{color:var(--red)}
+
+/* remember line */
+.mem{display:flex;gap:.6rem;align-items:baseline;border-top:1px solid var(--line);padding-top:.8rem;margin-top:.2rem}
+.mem .k{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.16em;color:var(--amber);white-space:nowrap}
+.mem p{font-size:.92rem;color:var(--on);font-weight:600}
+
+/* part dividers */
+.divider{display:flex;align-items:center;gap:.9rem;margin:2.2rem 0 1.1rem;font-family:var(--mono)}
+.divider .pn{font-size:.7rem;font-weight:700;letter-spacing:.2em;color:var(--violet)}
+.divider .pt{font-size:.85rem;font-weight:700;color:var(--on)}
+.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* finish */
+.finish{max-width:760px;margin:0 auto;padding:0 1.2rem 5rem;text-align:center}
+.finish .box{border:1px dashed var(--line2);border-radius:18px;padding:2rem 1.4rem;background:rgba(21,27,35,.6)}
+.finish h3{font-size:1.4rem;font-weight:800;margin-bottom:.4rem}
+.finish h3 span{display:none}
+.finish.alldone h3 span{display:inline}
+.finish p{color:var(--dim);max-width:48ch;margin:0 auto .9rem}
+.finish a.btn{display:inline-block;font-family:var(--mono);font-size:.8rem;font-weight:700;color:#0c0f14;background:var(--teal);border-radius:99px;padding:.7rem 1.4rem}
+footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--mute)}
+@media (max-width:560px){ .card{padding:1.2rem 1.1rem 1.1rem} .hero{padding-top:5.5rem} }
+</style>
+</head>
+<body>
+
+<div class="progress">
+  <span class="label"><b id="count">0</b>/15 grasped</span>
+  <div class="bar"><i id="fill"></i></div>
+  <a class="full" href="flow.html">🗺️ one-glance map</a>
+  <a class="full" href="index.html">full atlas →</a>
+</div>
+
+<section class="hero">
+  <div class="over">The 5-minute speedrun</div>
+  <h1>Agentic AI.<br><em>One idea per card.</em></h1>
+  <p>The whole 15-figure atlas, compressed. Read a card, check it off, move on. Come back for the deep version whenever a card hooks you.</p>
+  <div class="rule">the entire field in one line:<br><b>tokens in → a loop that acts → tokens out</b> — everything else is safety rails and receipts</div>
+</section>
+
+<main class="deck">
+
+<div class="divider"><span class="pn">PART I</span><span class="pt">What you're actually running on</span></div>
+
+<article class="card" id="c1">
+  <div class="top"><span class="num">01</span><h2>It's all tokens</h2><input class="check" type="checkbox" aria-label="Mark card 1 grasped"></div>
+  <p class="what">The model never sees words, JSON, or "instructions" — just integer IDs. It predicts <b>one token per full pass</b> through the network, appends it, and runs again.</p>
+  <div class="flow"><span class="n">"Explain KV caches"</span><span class="ar t">→</span><span class="n t">[849, 34745…]</span><span class="ar t">→</span><span class="n">model</span><span class="ar t">→</span><span class="n t">next token</span><span class="ar v">⟲ repeat</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Every single output token = one full forward pass. That's the heartbeat.</p></div>
+</article>
+
+<article class="card" id="c2">
+  <div class="top"><span class="num">02</span><h2>Serving = read fast, write slow</h2><input class="check" type="checkbox" aria-label="Mark card 2 grasped"></div>
+  <p class="what">Inference has two phases: <b>prefill</b> chews your whole prompt in parallel (fast), <b>decode</b> emits one token at a time (slow). Stable prompt prefixes get cached and skip prefill.</p>
+  <div class="flow"><span class="n">request</span><span class="ar t">→</span><span class="n v">batcher</span><span class="ar t">→</span><span class="n">prefill ⚡</span><span class="ar t">→</span><span class="n">decode 🐢</span><span class="ar t">→</span><span class="n t">stream</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>One changed byte early in the prompt = cache gone = full price. Keep prefixes stable.</p></div>
+</article>
+
+<article class="card" id="c3">
+  <div class="top"><span class="num">03</span><h2>There is no memory, only the window</h2><input class="check" type="checkbox" aria-label="Mark card 3 grasped"></div>
+  <p class="what">System prompt, tools, memories, RAG chunks, history, your question — <b>everything competes for one flat token array</b>. An assembler prioritizes, budgets, and truncates.</p>
+  <div class="flow"><span class="n">system</span><span class="n v">tools</span><span class="n">memory</span><span class="n a">rag</span><span class="n">history</span><span class="ar t">→</span><span class="n v">assembler</span><span class="ar t">→</span><span class="n t">one flat sequence</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Give every source a token budget — unbudgeted context fails silently.</p></div>
+</article>
+
+<div class="divider"><span class="pn">PART II</span><span class="pt">The agent itself</span></div>
+
+<article class="card" id="c4">
+  <div class="top"><span class="num">04</span><h2>An agent is a while-loop</h2><input class="check" type="checkbox" aria-label="Mark card 4 grasped"></div>
+  <p class="what">Read context → decide → call a tool → observe the result → append it → go again. That's it. <b>Everything else in the field hangs off this cycle.</b></p>
+  <div class="flow"><span class="n">context</span><span class="ar v">→</span><span class="n">LLM</span><span class="ar v">→</span><span class="n v">tool call?</span><span class="ar v">→</span><span class="n">execute</span><span class="ar v">→</span><span class="n">observe</span><span class="ar v">⟲</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>The model proposes; the runtime disposes. Bound the loop or it won't stop itself.</p></div>
+</article>
+
+<article class="card" id="c5">
+  <div class="top"><span class="num">05</span><h2>Tool calls are just text</h2><input class="check" type="checkbox" aria-label="Mark card 5 grasped"></div>
+  <p class="what">The model emits JSON. The runtime validates it, checks permissions, runs the handler, truncates the result, and feeds it back as tokens. <b>The model never executes anything.</b></p>
+  <div class="flow"><span class="n t">{"name":"search",…}</span><span class="ar">→</span><span class="n">validate</span><span class="ar">→</span><span class="n a">policy</span><span class="ar">→</span><span class="n">run</span><span class="ar">→</span><span class="n t">result → tokens</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Tool results are untrusted input — a scraped webpage can inject instructions.</p></div>
+</article>
+
+<article class="card" id="c6">
+  <div class="top"><span class="num">06</span><h2>MCP = USB for AI tools</h2><input class="check" type="checkbox" aria-label="Mark card 6 grasped"></div>
+  <p class="what">One protocol (JSON-RPC) between your agent and any server. Every server exposes the same three things: <b>tools, resources, prompts</b>. M×N custom integrations become M+N.</p>
+  <div class="flow"><span class="n">agent host</span><span class="ar t">→</span><span class="n v">MCP client</span><span class="ar t">→</span><span class="n">github · postgres · files…</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Treat MCP servers like npm dependencies, not config — they inject text into your loop.</p></div>
+</article>
+
+<article class="card" id="c7">
+  <div class="top"><span class="num">07</span><h2>RAG is two pipelines</h2><input class="check" type="checkbox" aria-label="Mark card 7 grasped"></div>
+  <p class="what">Offline: chunk and embed docs into an index. Online: embed the query, fetch top matches, rerank, keep the best few. <b>Change one lane without the other and quality silently rots.</b></p>
+  <div class="flow"><span class="n">docs</span><span class="ar">→</span><span class="n a">index</span><span class="ar a">⇢</span><span class="n">search + rerank</span><span class="ar t">→</span><span class="n t">top-k chunks</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Most "hallucinations" are retrieval misses. Eval retrieval on its own.</p></div>
+</article>
+
+<article class="card" id="c8">
+  <div class="top"><span class="num">08</span><h2>Memory is a discipline, not a feature</h2><input class="check" type="checkbox" aria-label="Mark card 8 grasped"></div>
+  <p class="what">The context window is a cache with brutal eviction. Real memory = <b>writing important stuff to persistent stores</b> (facts, transcripts, playbooks) and recalling it next session.</p>
+  <div class="flow"><span class="n v">working context</span><span class="ar a">→ distill →</span><span class="n a">stores</span><span class="ar t">→ recall →</span><span class="n v">next session</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>One wrong saved "fact" poisons every future session. Memories need provenance.</p></div>
+</article>
+
+<div class="divider"><span class="pn">PART III</span><span class="pt">When it grows up</span></div>
+
+<article class="card" id="c9">
+  <div class="top"><span class="num">09</span><h2>Multi-agent = split the context, not the job title</h2><input class="check" type="checkbox" aria-label="Mark card 9 grasped"></div>
+  <p class="what">When one window can't hold the job: an orchestrator decomposes, isolated workers run in parallel, <b>a critic verifies before anything merges</b>. Agents exchange messages, never memory.</p>
+  <div class="flow"><span class="n v">orchestrator</span><span class="ar v">→</span><span class="n">worker</span><span class="n">worker</span><span class="n">worker</span><span class="ar t">→</span><span class="n a">critic</span><span class="ar t">→</span><span class="n t">merge</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>"Done ✓" from a worker is a claim, not a fact. Verify before you merge.</p></div>
+</article>
+
+<article class="card" id="c10">
+  <div class="top"><span class="num">10</span><h2>Gate actions by blast radius</h2><input class="check" type="checkbox" aria-label="Mark card 10 grasped"></div>
+  <p class="what">Reads auto-run. Reversible writes get logged. Irreversible stuff (send, delete, pay, deploy) gets <b>a human or a hard deny</b>. Enforce it in code — the prompt is a suggestion.</p>
+  <div class="flow"><span class="n v">proposed action</span><span class="ar">→</span><span class="n a">policy engine</span><span class="ar t">→</span><span class="n t">auto</span><span class="ar a">/</span><span class="n a">human ok?</span><span class="ar r">/</span><span class="n r">denied</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Review the exact tool call (the diff, the recipient), not the conversation.</p></div>
+</article>
+
+<article class="card" id="c11">
+  <div class="top"><span class="num">11</span><h2>Agents die 5 ways</h2><input class="check" type="checkbox" aria-label="Mark card 11 grasped"></div>
+  <p class="what">Provider errors → retry. Bad tool args → feed the error back. <b>Confident wrong answers → independent verification.</b> Full context → compact. Loops → circuit breaker.</p>
+  <div class="flow"><span class="n r">timeout</span><span class="n r">bad args</span><span class="n r">confident lie</span><span class="n r">overflow</span><span class="n r">loop</span><span class="ar t">→</span><span class="n t">5 known fixes</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>The dangerous one is #3 — it doesn't announce itself. Never trust self-reports.</p></div>
+</article>
+
+<div class="divider"><span class="pn">PART IV</span><span class="pt">How you know it works (the part everyone skips)</span></div>
+
+<article class="card" id="c12">
+  <div class="top"><span class="num">12</span><h2>Evals = CI for a non-deterministic thing</h2><input class="check" type="checkbox" aria-label="Mark card 12 grasped"></div>
+  <p class="what">Golden test cases run <b>N times each</b> through a sandboxed agent. Graders score the outcomes. A gate blocks regressions from shipping. Build this first, not last.</p>
+  <div class="flow"><span class="n a">golden set</span><span class="ar">→</span><span class="n v">runner ×N</span><span class="ar">→</span><span class="n">agent</span><span class="ar a">→</span><span class="n">graders</span><span class="ar a">→</span><span class="n a">ship / block</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>One trial is an anecdote. Grade end states, not vibes. Start with 20 real failures.</p></div>
+</article>
+
+<article class="card" id="c13">
+  <div class="top"><span class="num">13</span><h2>A model can grade a model — if you calibrate it</h2><input class="check" type="checkbox" aria-label="Mark card 13 grasped"></div>
+  <p class="what">Give the judge a rubric with examples, control its biases (position, verbosity, self-preference), and <b>measure its agreement with human labels</b>. No agreement score = no judge.</p>
+  <div class="flow"><span class="n">transcript</span><span class="n a">rubric</span><span class="ar">→</span><span class="n">judge</span><span class="ar t">→</span><span class="n t">verdict</span><span class="ar a">⇢ κ vs humans</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>An uncalibrated judge is a random-number generator with confidence.</p></div>
+</article>
+
+<article class="card" id="c14">
+  <div class="top"><span class="num">14</span><h2>Trace every step or debug blind</h2><input class="check" type="checkbox" aria-label="Mark card 14 grasped"></div>
+  <p class="what">An agent run is a distributed trace: every LLM call and tool call is a span tagged with <b>tokens, cost, latency, status</b>. Metrics say something broke; the trace says what.</p>
+  <div class="flow"><span class="n">session</span><span class="ar">▸</span><span class="n">turn</span><span class="ar">▸</span><span class="n t">llm.call $0.06</span><span class="n v">tool.call 840ms</span><span class="ar t">→</span><span class="n">dashboards</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>You can't eval what you didn't record. Alert on $/task, not just errors.</p></div>
+</article>
+
+<article class="card" id="c15">
+  <div class="top"><span class="num">15</span><h2>Close the loop and you compound</h2><input class="check" type="checkbox" aria-label="Mark card 15 grasped"></div>
+  <p class="what">Production failures → curated eval cases → safer changes → better agent → richer traces. <b>Teams with this flywheel compound; teams without it guess.</b></p>
+  <div class="flow"><span class="n t">prod</span><span class="ar t">→</span><span class="n">traces</span><span class="ar a">→</span><span class="n a">eval cases</span><span class="ar a">→</span><span class="n">iterate</span><span class="ar v">→</span><span class="n a">gate</span><span class="ar t">→</span><span class="n t">prod ⟲</span></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Prompts get copied, models get upgraded — your failure corpus is the moat.</p></div>
+</article>
+
+</main>
+
+<section class="finish" id="finish">
+  <div class="box">
+    <h3><span>🎉 </span>That's the whole field.</h3>
+    <p>Fifteen ideas. Any card that hooked you has a full schematic — with the design decisions and the failure modes — in the deep version.</p>
+    <a class="btn" href="index.html">Open the full atlas →</a>
+  </div>
+</section>
+
+<footer>speedrun edition · <a href="index.html">full atlas</a> · by <a href="https://ljafri.me">Laraib Jafri</a></footer>
+
+<script>
+const KEY='aa-speedrun-v1';
+const boxes=[...document.querySelectorAll('.check')];
+const saved=JSON.parse(localStorage.getItem(KEY)||'[]');
+boxes.forEach((b,i)=>{ b.checked=!!saved[i]; sync(b); b.addEventListener('change',()=>{ sync(b); persist(); }); });
+function sync(b){ b.closest('.card').classList.toggle('done',b.checked); update(); }
+function persist(){ localStorage.setItem(KEY, JSON.stringify(boxes.map(b=>b.checked))); }
+function update(){
+  const n=boxes.filter(b=>b.checked).length;
+  document.getElementById('count').textContent=n;
+  document.getElementById('fill').style.width=(n/15*100)+'%';
+  document.getElementById('finish').classList.toggle('alldone', n===15);
+}
+update();
+</script>
+</body>
+</html>

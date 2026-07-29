@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI — The One-Glance Flow</title>
+<meta name="description" content="The entire agentic AI architecture as one follow-the-path flow diagram. Trace it 1 to 5. Built for short attention spans.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --teal:#5eead4;--violet:#a78bfa;--amber:#fbbf24;--red:#f87171;
+  --bg:#0c0f14;--on:#f1f5f9;--dim:#94a3b8;--mute:#64748b;--line:#1e293b;--line2:#334155;
+  --mono:'JetBrains Mono',monospace;--body:'Inter',sans-serif;
+}
+body{font-family:var(--body);color:var(--on);background:var(--bg);
+  background-image:linear-gradient(rgba(148,163,184,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.035) 1px,transparent 1px);
+  background-size:36px 36px;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:var(--teal);text-decoration:none}
+.top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;
+  padding:.8rem 1.4rem;background:rgba(12,15,20,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.75rem}
+.top .crumb{color:var(--dim)} .top .crumb b{color:var(--teal)}
+.top .links a{color:var(--dim);border:1px solid var(--line2);border-radius:99px;padding:.3rem .75rem;margin-left:.4rem}
+.top .links a:hover{color:var(--teal);border-color:var(--teal)}
+.wrap{max-width:1280px;margin:0 auto;padding:5.5rem 1.2rem 3rem}
+.head{text-align:center;margin-bottom:1.4rem}
+.head .over{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.22em;color:var(--teal);text-transform:uppercase}
+.head h1{font-size:clamp(1.8rem,5vw,2.9rem);font-weight:800;letter-spacing:-.03em;margin:.5rem 0 .4rem}
+.head h1 em{font-style:normal;color:var(--teal)}
+.head p{color:var(--dim);max-width:52ch;margin:0 auto;font-size:.95rem}
+.head p b{color:var(--on)}
+.board{border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,rgba(21,27,35,.7),rgba(15,20,25,.92));padding:1rem;overflow-x:auto}
+.board svg{display:block;width:100%;min-width:960px;height:auto;font-family:var(--mono)}
+.legend{display:flex;flex-wrap:wrap;gap:1.3rem;justify-content:center;margin-top:1.2rem;font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+.legend .li{display:flex;align-items:center;gap:.5rem}
+.legend .sw{width:26px;height:0;border-top:3px solid;border-radius:2px}
+.takeaway{text-align:center;margin-top:1.6rem;font-family:var(--mono);font-size:.9rem;color:var(--on)}
+.takeaway b{color:var(--violet)}
+footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--mute)}
+
+/* svg language */
+svg .box{fill:#151b23;stroke:#334155;stroke-width:1.4}
+svg .box.t{fill:rgba(94,234,212,.09);stroke:#2dd4bf}
+svg .box.v{fill:rgba(167,139,250,.10);stroke:#8b5cf6}
+svg .box.a{fill:rgba(251,191,36,.09);stroke:#b48a24}
+svg .box.r{fill:rgba(248,113,113,.09);stroke:#b45555}
+svg .loopbg{fill:rgba(167,139,250,.05);stroke:#8b5cf6;stroke-width:1.6;stroke-dasharray:8 6}
+svg .railbg{fill:rgba(251,191,36,.04);stroke:#b48a24;stroke-width:1.4;stroke-dasharray:8 6}
+svg .t1{fill:#f1f5f9;font-size:15px;font-weight:700;text-anchor:middle}
+svg .t2{fill:#f1f5f9;font-size:12px;font-weight:700;text-anchor:middle}
+svg .s{fill:#94a3b8;font-size:10.5px;text-anchor:middle}
+svg .cap{fill:#64748b;font-size:10px;font-weight:700;letter-spacing:.14em;text-anchor:start}
+svg .capv{fill:#a78bfa;font-size:11px;font-weight:700;letter-spacing:.12em;text-anchor:start}
+svg .capa{fill:#fbbf24;font-size:11px;font-weight:700;letter-spacing:.12em;text-anchor:start}
+svg .lblt{fill:#5eead4;font-size:10px;text-anchor:middle}
+svg .lbla{fill:#fbbf24;font-size:10px;text-anchor:middle}
+svg .lblr{fill:#f87171;font-size:10px;text-anchor:middle}
+svg .flow{fill:none;stroke:#5eead4;stroke-width:2.2}
+svg .ctl{fill:none;stroke:#a78bfa;stroke-width:2}
+svg .fb{fill:none;stroke:#fbbf24;stroke-width:2;stroke-dasharray:6 5}
+svg .deny{fill:none;stroke:#f87171;stroke-width:1.8}
+svg .beat{fill:#0c0f14;stroke:#5eead4;stroke-width:2}
+svg .beatn{fill:#5eead4;font-size:17px;font-weight:800;text-anchor:middle}
+svg .zone{fill:#64748b;font-size:9.5px;font-weight:700;letter-spacing:.18em;text-anchor:middle}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="crumb"><b>LJ</b> / agent-architectures / flow</div>
+  <div class="links"><a href="speedrun.html">⚡ speedrun</a><a href="index.html">full atlas →</a></div>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <div class="over">The one-glance flow</div>
+    <h1>The whole thing, <em>one line to trace.</em></h1>
+    <p>No reading required. Follow the glowing dot <b>1 → 5</b>. The purple ring is the loop that does the work; the gold rail underneath is how you know it works.</p>
+  </div>
+
+  <div class="board">
+  <svg viewBox="0 0 1240 680" role="img" aria-label="One-glance flow diagram of an agentic AI system: tokens in, context window, the agent loop, the guardrail gate, and answer out, with a feedback rail of traces, observability and evals looping back.">
+    <defs>
+      <marker id="mt" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5eead4"/></marker>
+      <marker id="mv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a78bfa"/></marker>
+      <marker id="ma" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+      <marker id="mr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+      <path id="spine" d="M40,300 H1210" fill="none"/>
+    </defs>
+
+    <!-- zone labels -->
+    <text class="zone" x="240" y="168">SUBSTRATE — WHAT IT RUNS ON</text>
+    <text class="zone" x="665" y="168">THE AGENT CORE</text>
+    <text class="zone" x="967" y="168">SAFETY</text>
+    <text class="zone" x="620" y="662">EVALS &amp; OBSERVABILITY — THE RECEIPTS</text>
+
+    <!-- beat number circles (own row, no overlap) -->
+    <circle class="beat" cx="127" cy="205" r="18"/><text class="beatn" x="127" y="211">1</text>
+    <circle class="beat" cx="352" cy="205" r="18"/><text class="beatn" x="352" y="211">2</text>
+    <circle class="beat" cx="665" cy="205" r="18" style="stroke:#a78bfa"/><text class="beatn" x="665" y="211" style="fill:#a78bfa">3</text>
+    <circle class="beat" cx="967" cy="205" r="18" style="stroke:#fbbf24"/><text class="beatn" x="967" y="211" style="fill:#fbbf24">4</text>
+    <circle class="beat" cx="1157" cy="205" r="18"/><text class="beatn" x="1157" y="211">5</text>
+
+    <!-- ===== main spine arrows (teal) ===== -->
+    <path class="flow" d="M215,300 H265" marker-end="url(#mt)"/>
+    <path class="flow" d="M440,300 H518" marker-end="url(#mt)"/>
+    <path class="flow" d="M760,300 H890" marker-end="url(#mt)"/>
+    <path class="flow" d="M1045,300 H1095" marker-end="url(#mt)"/>
+    <text class="lblt" x="825" y="291">no tool → done</text>
+
+    <!-- animated data packets gliding the spine -->
+    <circle r="6" fill="#5eead4"><animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#spine"/></animateMotion><animate attributeName="opacity" dur="4.5s" repeatCount="indefinite" values="0;1;1;1;0" keyTimes="0;0.05;0.5;0.95;1"/></circle>
+    <circle r="5" fill="#a78bfa" opacity="0.75"><animateMotion dur="4.5s" begin="2.2s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#spine"/></animateMotion></circle>
+
+    <!-- ===== 1 · TOKENS IN ===== -->
+    <rect class="box t" x="40" y="255" width="175" height="90" rx="12"/>
+    <text class="t1" x="127" y="296">TOKENS IN</text>
+    <text class="s" x="127" y="316">prompt → integer IDs</text>
+
+    <!-- ===== 2 · CONTEXT ===== -->
+    <rect class="box" x="265" y="255" width="175" height="90" rx="12"/>
+    <text class="t1" x="352" y="291">CONTEXT</text>
+    <text class="s" x="352" y="310">one flat token array</text>
+    <text class="s" x="352" y="326">the only thing it sees</text>
+
+    <!-- feeders that fill the window -->
+    <rect class="box v" x="205" y="445" width="130" height="52" rx="9"/>
+    <text class="t2" x="270" y="467">TOOLS · MCP</text><text class="s" x="270" y="483">what it can do</text>
+    <rect class="box a" x="352" y="445" width="108" height="52" rx="9"/>
+    <text class="t2" x="406" y="467">RAG</text><text class="s" x="406" y="483">what it knows</text>
+    <rect class="box" x="478" y="445" width="120" height="52" rx="9"/>
+    <text class="t2" x="538" y="467">MEMORY</text><text class="s" x="538" y="483">what it recalls</text>
+    <path class="flow" d="M270,445 C270,406 318,378 330,347" marker-end="url(#mt)"/>
+    <path class="flow" d="M406,445 C406,408 372,372 360,347" marker-end="url(#mt)"/>
+    <path class="flow" d="M538,443 C538,402 452,372 428,347" marker-end="url(#mt)"/>
+    <text class="s" x="352" y="520" style="fill:#64748b">↑ these three fill the window</text>
+
+    <!-- ===== 3 · THE AGENT LOOP ===== -->
+    <rect class="loopbg" x="490" y="235" width="350" height="172" rx="16"/>
+    <text class="capv" x="508" y="258">THE AGENT LOOP</text>
+    <text class="s" x="700" y="258" style="fill:#64748b">runs until done ⟲</text>
+
+    <rect class="box" x="520" y="278" width="120" height="44" rx="8"/>
+    <text class="t2" x="580" y="304">LLM decides</text>
+    <polygon class="box v" points="712,272 760,300 712,328 664,300"/>
+    <text class="t2" x="712" y="304">tool?</text>
+    <rect class="box" x="700" y="350" width="120" height="42" rx="8"/>
+    <text class="t2" x="760" y="375">EXECUTE</text>
+    <rect class="box" x="520" y="350" width="120" height="42" rx="8"/>
+    <text class="t2" x="580" y="375">OBSERVE</text>
+    <!-- clean 2x2 cycle (violet), no crossings -->
+    <path class="ctl" d="M640,300 H662" marker-end="url(#mv)"/>
+    <path class="ctl" d="M712,328 V348" marker-end="url(#mv)"/>
+    <path class="ctl" d="M700,371 H642" marker-end="url(#mv)"/>
+    <path class="ctl" d="M580,350 V324" marker-end="url(#mv)"/>
+    <text class="s" x="676" y="345" style="fill:#a78bfa">⟲</text>
+
+    <!-- ===== 4 · THE GATE ===== -->
+    <rect class="box a" x="890" y="255" width="155" height="90" rx="12"/>
+    <text class="t1" x="967" y="291">THE GATE</text>
+    <text class="s" x="967" y="310">classify by blast radius</text>
+    <text class="s" x="967" y="326">auto · ask human · deny</text>
+    <!-- approved actions return to execute -->
+    <path class="fb" d="M905,345 C845,405 812,398 792,395" marker-end="url(#ma)"/>
+    <text class="lbla" x="852" y="430">approved → act</text>
+    <!-- deny stub -->
+    <path class="deny" d="M990,345 V384" marker-end="url(#mr)"/>
+    <text class="lblr" x="1028" y="378">deny ✗</text>
+
+    <!-- ===== 5 · ANSWER ===== -->
+    <rect class="box t" x="1095" y="255" width="125" height="90" rx="12"/>
+    <text class="t1" x="1157" y="296">ANSWER</text>
+    <text class="s" x="1157" y="316">out ✓</text>
+
+    <!-- ===== return rail — the flywheel (amber) ===== -->
+    <rect class="railbg" x="270" y="565" width="700" height="72" rx="14"/>
+    <rect class="box a" x="300" y="580" width="150" height="44" rx="8"/>
+    <text class="t2" x="375" y="607">TRACES</text>
+    <rect class="box a" x="486" y="580" width="180" height="44" rx="8"/>
+    <text class="t2" x="576" y="607">OBSERVABILITY</text>
+    <rect class="box a" x="702" y="580" width="150" height="44" rx="8"/>
+    <text class="t2" x="777" y="607">EVALS + GATE</text>
+    <path class="fb" d="M450,602 H482" marker-end="url(#ma)"/>
+    <path class="fb" d="M666,602 H698" marker-end="url(#ma)"/>
+    <!-- loop drops a trace down to the rail -->
+    <path class="fb" d="M632,407 V498 C632,538 440,562 378,580" marker-end="url(#ma)"/>
+    <text class="lbla" x="690" y="474">every step → a trace</text>
+    <!-- evals climb back into the loop -->
+    <path class="fb" d="M800,580 C885,500 810,440 748,408" marker-end="url(#ma)"/>
+    <text class="lbla" x="900" y="520">block regressions · improve ⟲</text>
+  </svg>
+  </div>
+
+  <div class="legend">
+    <div class="li"><span class="sw" style="border-color:#5eead4"></span> data flowing forward</div>
+    <div class="li"><span class="sw" style="border-color:#a78bfa"></span> the loop (control)</div>
+    <div class="li"><span class="sw" style="border-color:#fbbf24"></span> feedback &amp; evals</div>
+    <div class="li"><span class="sw" style="border-color:#f87171"></span> blocked / denied</div>
+  </div>
+
+  <div class="takeaway"><b>tokens in → a loop that acts → tokens out.</b> The gate keeps it safe. The gold rail keeps it honest.</div>
+</div>
+
+<footer>one-glance flow · <a href="speedrun.html">15-card speedrun</a> · <a href="index.html">full atlas</a> · by <a href="https://ljafri.me">Laraib Jafri</a></footer>
+</body>
+</html>

@@ -110,9 +110,9 @@ svg .zone{fill:#64748b;font-size:9.5px;font-weight:700;letter-spacing:.18em;text
     <path class="flow" d="M1045,300 H1095" marker-end="url(#mt)"/>
     <text class="lblt" x="825" y="291">no tool → done</text>
 
-    <!-- animated data packets gliding the spine -->
-    <circle r="6" fill="#5eead4"><animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#spine"/></animateMotion><animate attributeName="opacity" dur="4.5s" repeatCount="indefinite" values="0;1;1;1;0" keyTimes="0;0.05;0.5;0.95;1"/></circle>
-    <circle r="5" fill="#a78bfa" opacity="0.75"><animateMotion dur="4.5s" begin="2.2s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#spine"/></animateMotion></circle>
+    <!-- animated data packets gliding the spine (JS rAF — reliable across all browsers) -->
+    <circle id="pkt1" r="6" cx="40" cy="300" fill="#5eead4"></circle>
+    <circle id="pkt2" r="5" cx="40" cy="300" fill="#a78bfa" opacity="0.75"></circle>
 
     <!-- ===== 1 · TOKENS IN ===== -->
     <rect class="box t" x="40" y="255" width="175" height="90" rx="12"/>
@@ -204,5 +204,30 @@ svg .zone{fill:#64748b;font-size:9.5px;font-weight:700;letter-spacing:.18em;text
 </div>
 
 <footer>one-glance flow · <a href="speedrun.html">15-card speedrun</a> · <a href="index.html">full atlas</a> · by <a href="https://ljafri.me">Laraib Jafri</a></footer>
+<script>
+// Move the two data packets along the spine (x: 40 -> 1200 at y=300).
+// Plain requestAnimationFrame so it works in every browser, including Safari
+// and file:// — no SMIL / mpath / xlink quirks.
+(function () {
+  var p1 = document.getElementById('pkt1'), p2 = document.getElementById('pkt2');
+  if (!p1 || !p2) return;
+  var X0 = 40, X1 = 1200, DUR = 4500;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    p1.setAttribute('cx', 620); p2.setAttribute('opacity', 0); return; // respect reduced motion
+  }
+  var start = null;
+  function frame(t) {
+    if (start === null) start = t;
+    var el = t - start;
+    var u1 = (el % DUR) / DUR;
+    p1.setAttribute('cx', X0 + (X1 - X0) * u1);
+    p1.setAttribute('opacity', u1 < 0.05 ? u1 / 0.05 : u1 > 0.95 ? (1 - u1) / 0.05 : 1);
+    var u2 = ((el + DUR * 0.5) % DUR) / DUR;   // second dot, half a cycle behind
+    p2.setAttribute('cx', X0 + (X1 - X0) * u2);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>

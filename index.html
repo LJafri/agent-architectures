@@ -240,7 +240,7 @@ footer a { color:var(--primary); }
         <span class="chip"><b>15</b> figures</span>
         <span class="chip"><b>4</b> layers: substrate → core → scale → evals</span>
         <span class="chip">hand-drawn SVG · no frameworks</span>
-        <span class="chip">Laraib Jafri · 2026</span>
+        <span class="chip">Laraib Jafri · 2026 · rev. Nov 2026</span>
         <a class="chip" href="speedrun.html" style="border-color:#2dd4bf">⚡ short on time? take the 5-min speedrun</a>
     </div>
     <div class="legend" aria-label="Diagram legend">
@@ -686,6 +686,7 @@ footer a { color:var(--primary); }
       <li><b>Schema design is prompt design:</b> the tool's name, description, and parameter names are read by the model as instructions. Vague schemas produce vague calls.</li>
       <li>Validate <em>before</em> permission-check, and feed validation errors back verbatim (step 3) — models self-correct malformed args reliably when shown the error.</li>
       <li><b>Truncate results deliberately</b> (step 6): a 2MB JSON response is a context-window attack from your own database.</li>
+      <li><b>Not every result has to pass through the model.</b> With programmatic tool calling the model emits code that calls tools inside a sandbox, and only the final value re-enters context at step 7. Reach for it when intermediate results are large or numerous.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li>Tool results are <b>untrusted input</b>: a scraped webpage or ticket body can carry prompt-injection that the model reads as instructions on step 7.</li>
@@ -700,12 +701,12 @@ footer a { color:var(--primary); }
     <span class="fig-no">FIG·06</span>
     <div>
       <h3>MCP — the integration bus</h3>
-      <p class="fig-lede">The Model Context Protocol turns M×N custom integrations into M+N: one host runs one client per server over JSON-RPC, and every server exposes the same three primitives — tools, resources, prompts.</p>
+      <p class="fig-lede">The Model Context Protocol turns M×N custom integrations into M+N: one host runs one client per server over JSON-RPC, every server exposes the same three primitives (tools, resources, prompts), and since the 2026-07-28 revision every request is self-contained: no handshake, no session.</p>
     </div>
     <span class="fig-tag">AGENT CORE</span>
   </div>
   <div class="svg-wrap">
-  <svg class="diagram" viewBox="0 0 960 440" role="img" aria-label="Diagram of Model Context Protocol architecture: a host with an agent loop and per-server MCP clients connected over stdio and streamable HTTP transports to MCP servers exposing tools, resources and prompts">
+  <svg class="diagram" viewBox="0 0 960 440" role="img" aria-label="Diagram of Model Context Protocol architecture (revision 2026-07-28): a host with an agent loop and per-server MCP clients making stateless, self-contained requests over stdio and streamable HTTP transports to MCP servers exposing tools, resources and prompts">
     <rect class="grp" x="20" y="40" width="300" height="330" rx="10"/>
     <text class="cap" x="34" y="60">HOST — AGENT RUNTIME</text>
     <rect class="nd" x="40" y="80" width="200" height="56" rx="8"/>
@@ -715,20 +716,20 @@ footer a { color:var(--primary); }
     <path class="ctl" d="M100,136 C68,170 68,230 100,254" marker-end="url(#arr-v)"/>
     <rect class="nd-v" x="40" y="180" width="200" height="50" rx="8"/>
     <text class="lbl2" x="140" y="200">MCP CLIENT</text>
-    <text class="sub" x="140" y="215">session A</text>
+    <text class="sub" x="140" y="215">server A</text>
     <rect class="nd-v" x="40" y="260" width="200" height="50" rx="8"/>
     <text class="lbl2" x="140" y="280">MCP CLIENT</text>
-    <text class="sub" x="140" y="295">session B</text>
-    <text class="tiny" x="140" y="338">one client per server —</text>
-    <text class="tiny" x="140" y="351">isolated, stateful sessions</text>
+    <text class="sub" x="140" y="295">server B</text>
+    <text class="tiny" x="140" y="338">one client per server,</text>
+    <text class="tiny" x="140" y="351">stateless since 2026-07-28: no session id</text>
 
     <path class="flow" d="M240,205 C400,205 400,120 552,120" marker-end="url(#arr-t)"/>
-    <text class="tinya" x="400" y="134">initialize → capability negotiation</text>
+    <text class="tinya" x="400" y="134">_meta carries version + capabilities · server/discover</text>
     <text class="tinyt" x="400" y="152">stdio — local process</text>
     <path class="flow" d="M240,285 C400,285 400,310 552,310" marker-end="url(#arr-t)"/>
-    <text class="tinyt" x="400" y="272">streamable HTTP — remote · OAuth</text>
+    <text class="tinyt" x="400" y="272">streamable HTTP · OAuth · Mcp-Method / Mcp-Name</text>
     <text class="tiny" x="400" y="392">every transport speaks JSON-RPC 2.0 —</text>
-    <text class="tiny" x="400" y="405">requests, responses, notifications</text>
+    <text class="tiny" x="400" y="405">requests, responses, multi-round-trip requests (MRTR)</text>
 
     <rect class="grp" x="560" y="50" width="380" height="140" rx="10"/>
     <text class="cap" x="574" y="70">MCP SERVER — FILESYSTEM (LOCAL)</text>
@@ -739,7 +740,7 @@ footer a { color:var(--primary); }
     <rect class="nd" x="820" y="92" width="104" height="44" rx="7"/>
     <text class="lbl2" x="872" y="118">PROMPTS</text>
     <text class="tiny" x="635" y="156">list · call</text>
-    <text class="tiny" x="755" y="156">read · subscribe</text>
+    <text class="tiny" x="755" y="156">list · read</text>
     <text class="tiny" x="872" y="156">templates</text>
 
     <rect class="grp" x="560" y="240" width="380" height="140" rx="10"/>
@@ -757,7 +758,7 @@ footer a { color:var(--primary); }
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>The protocol is the contract:</b> capability negotiation at <code>initialize</code> means hosts and servers evolve independently — the M×N integration matrix collapses to M+N.</li>
+      <li><b>The protocol is the contract:</b> since revision 2026-07-28 there is no <code>initialize</code> handshake and no <code>Mcp-Session-Id</code>. Every request carries its protocol version and client capabilities in <code>_meta</code>, with <code>server/discover</code> to fetch server capabilities on demand. A server sits behind a load balancer like any other HTTP service, and the M×N integration matrix still collapses to M+N.</li>
       <li>Tools are model-controlled, resources are app-controlled, prompts are user-controlled. Choosing the right primitive is an API-design decision, not a naming one.</li>
       <li>Server tool descriptions enter your context window (FIG·03). Twenty connected servers can spend your budget before the user types a word — lazy-load or search tools instead of front-loading all schemas.</li>
     </ul></div>
@@ -765,6 +766,7 @@ footer a { color:var(--primary); }
       <li><b>Trust boundary:</b> a third-party MCP server injects text straight into your loop — tool descriptions and results are both injection surfaces. Treat servers like npm dependencies, not like config.</li>
       <li>Remote servers add OAuth, network partitions, and version skew to what used to be a local function call. Timeouts and degraded modes are part of the design.</li>
       <li>Two servers exporting similarly-named tools (<code>search</code>, <code>query</code>) make the model's tool choice ambiguous — namespace or curate.</li>
+      <li><b>Stateless moved the state, it did not delete it.</b> Anything you keyed off <code>Mcp-Session-Id</code> now needs an explicit handle in your harness or context (FIG·03, FIG·08). Roots, sampling and logging are deprecated and <code>resources/subscribe</code> is gone, so a 2026-07-28-only server answers legacy clients with 405 or MethodNotFound.</li>
     </ul></div>
   </div>
 </article>
@@ -907,6 +909,7 @@ footer a { color:var(--primary); }
       <li><b>Working context is not memory</b> — it's a cache with brutal eviction. Anything worth keeping must be explicitly written somewhere persistent before compaction eats it.</li>
       <li>Split by type because access patterns differ: episodic is append-only and searched rarely; semantic is small, hot, and loaded every session; procedural changes agent <em>behavior</em> and deserves review like code.</li>
       <li>Reflection runs off the critical path — an agent that pauses mid-task to journal is spending the user's latency on its own bookkeeping.</li>
+      <li>The stores now have off-the-shelf shapes: provider memory tools and server-side compaction with tool-result clearing cover the working-context and semantic lanes, and procedural memory has a de facto standard in skills (one <code>SKILL.md</code> per directory, loaded by progressive disclosure: frontmatter at startup, body on demand).</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Memory poisoning:</b> one wrong extracted "fact" gets recalled into every future session and compounds. Memories need provenance and an expiry/correction path.</li>
@@ -1302,21 +1305,21 @@ footer a { color:var(--primary); }
     <span class="fig-tag">OBSERVABILITY</span>
   </div>
   <div class="svg-wrap">
-  <svg class="diagram" viewBox="0 0 960 520" role="img" aria-label="Diagram of agent observability: a trace tree of session, turn, llm.call and tool.call spans flows through an OTel-compatible collector to a trace explorer, metrics, alerts, and transcript sampling that feeds eval datasets">
+  <svg class="diagram" viewBox="0 0 960 520" role="img" aria-label="Diagram of agent observability: a trace tree of invoke_agent, chat and execute_tool spans named per the OpenTelemetry GenAI semantic conventions flows through an OTel collector to a trace explorer, metrics, alerts, and transcript sampling that feeds eval datasets">
     <rect class="grp" x="20" y="40" width="450" height="340" rx="10"/>
     <text class="cap" x="34" y="60">ONE AGENT RUN — TRACE TREE</text>
     <rect class="bar" x="40" y="80" width="410" height="30" rx="4"/>
     <text class="sub ta-s" x="50" y="99">session #a1f3 — 14 turns · 96k tok · $0.42</text>
     <rect class="bar" x="60" y="122" width="370" height="28" rx="4"/>
-    <text class="sub ta-s" x="70" y="140">turn 3 — "fix the failing deploy"</text>
+    <text class="sub ta-s" x="70" y="140">invoke_agent · turn 3 · "fix the failing deploy"</text>
     <rect class="nd-t" x="80" y="162" width="330" height="26" rx="4"/>
-    <text class="sub ta-s" x="90" y="179">llm.call — in 12.4k · out 512 · 3.1s · $0.06</text>
+    <text class="sub ta-s" x="90" y="179">chat · in 12.4k · out 512 · 3.1s · $0.06</text>
     <rect class="nd-v" x="80" y="198" width="330" height="26" rx="4"/>
-    <text class="sub ta-s" x="90" y="215">tool.call github.search — 840ms · ok</text>
+    <text class="sub ta-s" x="90" y="215">execute_tool github.search · 840ms · ok</text>
     <rect class="nd-t" x="80" y="234" width="330" height="26" rx="4"/>
-    <text class="sub ta-s" x="90" y="251">llm.call — in 13.1k · out 388 · 2.4s · $0.05</text>
+    <text class="sub ta-s" x="90" y="251">chat · in 13.1k · out 388 · 2.4s · $0.05</text>
     <rect class="nd-e" x="80" y="270" width="330" height="26" rx="4"/>
-    <text class="sub ta-s" x="90" y="287">tool.call deploy.run — timeout ✗</text>
+    <text class="sub ta-s" x="90" y="287">execute_tool deploy.run · timeout ✗</text>
     <text class="tiny" x="245" y="320">every step is a span, tagged with:</text>
     <rect class="ghost" x="60" y="332" width="74" height="24" rx="12"/>
     <text class="tiny" x="97" y="347">tokens</text>
@@ -1332,7 +1335,7 @@ footer a { color:var(--primary); }
     <path class="flow" d="M470,210 H514" marker-end="url(#arr-t)"/>
     <rect class="nd" x="520" y="170" width="150" height="80" rx="9"/>
     <text class="lbl2" x="595" y="202">COLLECTOR</text>
-    <text class="sub" x="595" y="218">OTel-compatible</text>
+    <text class="sub" x="595" y="218">OTel gen_ai.* semconv</text>
 
     <path class="flow" d="M670,190 C700,190 700,90 714,90" marker-end="url(#arr-t)"/>
     <rect class="nd" x="720" y="60" width="220" height="60" rx="8"/>
@@ -1364,6 +1367,7 @@ footer a { color:var(--primary); }
       <li><b>Trace at the step level, always.</b> Aggregate metrics tell you something regressed; only the span tree tells you it was turn 7, after that one tool timeout, in contexts over 80k tokens.</li>
       <li>Cost is a first-class metric: $/task and tokens/task catch runaway loops days before the invoice does. Alert on rate-of-change, not absolutes.</li>
       <li>Use the same trace format in the eval harness (FIG·12) and production — then a failed eval and a failed prod run are debuggable with the same tooling.</li>
+      <li>Name spans by the OpenTelemetry GenAI conventions (<code>gen_ai.operation.name</code>: <code>chat</code>, <code>invoke_agent</code>, <code>execute_tool</code>) and attach grader verdicts as <code>gen_ai.evaluation.result</code> events, so FIG·12's scorecard rides the same pipeline. The conventions are still Development status, in their own repo since June 2026, so pin the version you emit.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Logging the metadata but not the payloads:</b> latency without prompts and completions can't explain <em>why</em> quality moved. Record content, redact PII at the collector.</li>

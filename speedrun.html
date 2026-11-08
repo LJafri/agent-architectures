@@ -214,7 +214,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
 <article class="card" id="c14">
   <div class="top"><span class="num">14</span><h2>Trace every step or debug blind</h2><input class="check" type="checkbox" aria-label="Mark card 14 grasped"></div>
   <p class="what">An agent run is a distributed trace: every LLM call and tool call is a span tagged with <b>tokens, cost, latency, status</b>. Metrics say something broke; the trace says what.</p>
-  <div class="flow"><span class="n">session</span><span class="ar">▸</span><span class="n">turn</span><span class="ar">▸</span><span class="n t">llm.call $0.06</span><span class="n v">tool.call 840ms</span><span class="ar t">→</span><span class="n">dashboards</span></div>
+  <div class="flow"><span class="n">session</span><span class="ar">▸</span><span class="n">turn</span><span class="ar">▸</span><span class="n t">chat $0.06</span><span class="n v">execute_tool 840ms</span><span class="ar t">→</span><span class="n">dashboards</span></div>
   <div class="mem"><span class="k">REMEMBER</span><p>You can't eval what you didn't record. Alert on $/task, not just errors.</p></div>
 </article>
 

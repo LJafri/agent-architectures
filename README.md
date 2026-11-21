@@ -36,10 +36,10 @@ No build step, no dependencies.
 
 | Part | Figures |
 |---|---|
-| **I — The Substrate** | 01 Prompt → token → inference · 02 Inference serving path · 03 Context window assembly |
-| **II — The Agent Core** | 04 The agent loop · 05 Anatomy of a tool call · 06 MCP architecture · 07 RAG pipeline · 08 Memory architecture |
-| **III — Scale & Safety** | 09 Multi-agent orchestration · 10 Guardrails & human-in-the-loop · 11 Failure modes → recovery |
-| **IV — Evals & Observability** | 12 The eval harness · 13 LLM-as-judge, calibrated · 14 Observability plane · 15 The data flywheel |
+| **I. The Substrate** | 01 Prompt → token → inference · 02 Inference serving path · 03 Context window assembly |
+| **II. The Agent Core** | 04 The agent loop · 05 Anatomy of a tool call · 06 MCP architecture · 07 RAG pipeline · 08 Memory architecture |
+| **III. Scale & Safety** | 09 Multi-agent orchestration · 10 Guardrails & human-in-the-loop · 11 Failure modes → recovery |
+| **IV. Evals & Observability** | 12 The eval harness · 13 LLM-as-judge, calibrated · 14 Observability plane · 15 The data flywheel |
 
 Figures cross-reference each other (FIG·05 validates what FIG·04 emits; FIG·14's traces become FIG·12's eval cases; FIG·15 closes the loop). Part IV is the section most teams build last and need first.
 

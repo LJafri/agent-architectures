@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agentic AI, Drawn to the Metal — Laraib Jafri</title>
+    <title>Agentic AI, Drawn to the Metal · Laraib Jafri</title>
     <meta name="description" content="15 low-level architecture diagrams of agentic AI systems: prompt to token to inference, the agent loop, tool calling, MCP, RAG, memory, multi-agent orchestration, guardrails, evals, and observability.">
     <meta name="author" content="Laraib Jafri">
     <meta name="robots" content="index, follow">
@@ -23,7 +23,7 @@
 
 <style>
 /* ============================================================
-   AGENT ARCHITECTURES — field atlas / engineering datasheet
+   AGENT ARCHITECTURES · field atlas / engineering datasheet
    Shares design tokens with ljafri.me
    ============================================================ */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -235,7 +235,7 @@ footer a { color:var(--primary); }
 <section class="hero">
     <div class="overline">Field Atlas · 15 Figures</div>
     <h1>Agentic AI,<br><em>drawn to the metal.</em></h1>
-    <p class="lede">Most agent diagrams stop at "LLM + tools." These don't. Fifteen low-level schematics of how agentic systems actually work — <strong>how a prompt becomes tokens becomes inference</strong>, how the loop turns model output into side-effects, and the part everyone skips: <strong>the eval harness and observability plane</strong> that make any of it trustworthy in production.</p>
+    <p class="lede">Most agent diagrams stop at "LLM + tools." These don't. Fifteen low-level schematics of how agentic systems actually work. <strong>How a prompt becomes tokens becomes inference</strong>, how the loop turns model output into side-effects, and the part everyone skips: <strong>the eval harness and observability plane</strong> that make any of it trustworthy in production.</p>
     <div class="hero-meta">
         <span class="chip"><b>15</b> figures</span>
         <span class="chip"><b>4</b> layers: substrate → core → scale → evals</span>
@@ -254,21 +254,21 @@ footer a { color:var(--primary); }
 
 <div class="layout">
     <nav class="fignav" aria-label="Figures">
-        <div class="part-label">I — Substrate</div>
+        <div class="part-label">I. Substrate</div>
         <a href="#fig-01"><span class="n">01</span> Prompt → token → inference</a>
         <a href="#fig-02"><span class="n">02</span> Inference serving path</a>
         <a href="#fig-03"><span class="n">03</span> Context window assembly</a>
-        <div class="part-label">II — Agent core</div>
+        <div class="part-label">II. Agent core</div>
         <a href="#fig-04"><span class="n">04</span> The agent loop</a>
         <a href="#fig-05"><span class="n">05</span> Anatomy of a tool call</a>
         <a href="#fig-06"><span class="n">06</span> MCP architecture</a>
         <a href="#fig-07"><span class="n">07</span> RAG pipeline</a>
         <a href="#fig-08"><span class="n">08</span> Memory architecture</a>
-        <div class="part-label">III — Scale &amp; safety</div>
+        <div class="part-label">III. Scale &amp; safety</div>
         <a href="#fig-09"><span class="n">09</span> Multi-agent orchestration</a>
         <a href="#fig-10"><span class="n">10</span> Guardrails &amp; HITL</a>
         <a href="#fig-11"><span class="n">11</span> Failure modes &amp; recovery</a>
-        <div class="part-label">IV — Evals &amp; observability</div>
+        <div class="part-label">IV. Evals &amp; observability</div>
         <a href="#fig-12"><span class="n">12</span> The eval harness</a>
         <a href="#fig-13"><span class="n">13</span> LLM-as-judge, calibrated</a>
         <a href="#fig-14"><span class="n">14</span> Observability plane</a>
@@ -283,7 +283,7 @@ footer a { color:var(--primary); }
     <span class="fig-no">FIG·01</span>
     <div>
       <h3>From prompt to token to inference</h3>
-      <p class="fig-lede">The full round trip of one generated token: text is tokenized to integer IDs, embedded, pushed through the transformer stack, scored into logits, sampled — then the chosen token is appended and the whole thing runs again. An "agent thinking" is this loop, thousands of times.</p>
+      <p class="fig-lede">The full round trip of one generated token: text is tokenized to integer IDs, embedded, pushed through the transformer stack, scored into logits, sampled, then the chosen token is appended and the whole thing runs again. An "agent thinking" is this loop, thousands of times.</p>
     </div>
     <span class="fig-tag">SUBSTRATE</span>
   </div>
@@ -318,7 +318,7 @@ footer a { color:var(--primary); }
     <text class="lbl2" x="815" y="156">MLP</text>
     <path class="ctl dash" d="M928,180 C955,150 955,90 930,64" marker-end="url(#arr-v)"/>
     <text class="tinyv" x="944" y="212">×N</text>
-    <text class="tiny" x="815" y="200">hidden state flows down the stack —</text>
+    <text class="tiny" x="815" y="200">hidden state flows down the stack:</text>
     <text class="tiny" x="815" y="214">each layer refines the representation</text>
 
     <!-- kv cache -->
@@ -361,19 +361,19 @@ footer a { color:var(--primary); }
     <!-- autoregressive loop -->
     <path class="ctl dash" d="M128,386 H60 V140 H410 V106" marker-end="url(#arr-v)"/>
     <text class="tinyv" x="235" y="130">append token → run the next forward pass (autoregressive)</text>
-    <text class="tiny" x="620" y="440">one full forward pass per output token —</text>
+    <text class="tiny" x="620" y="440">one full forward pass per output token:</text>
     <text class="tiny" x="620" y="454">this is why decode speed is the agent's heartbeat</text>
   </svg>
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>Tokens are the only currency.</b> The model never sees words, JSON, or "instructions" — just integer IDs. Every prompt-engineering trick is really token-sequence engineering.</li>
+      <li><b>Tokens are the only currency.</b> The model never sees words, JSON, or "instructions", just integer IDs. Every prompt-engineering trick is really token-sequence engineering.</li>
       <li><b>The KV cache is why long contexts are viable:</b> attention keys/values for past tokens are computed once, then reused every subsequent step.</li>
-      <li>Sampling parameters live <em>outside</em> the model — same logits, different temperature, different agent behavior. Treat them as config under version control.</li>
+      <li>Sampling parameters live <em>outside</em> the model: same logits, different temperature, different agent behavior. Treat them as config under version control.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
-      <li><b>Tokenizer surprises:</b> whitespace, numbers, and rare strings split unpredictably — string-length budgeting drifts from token-length reality.</li>
-      <li>KV cache memory grows linearly with sequence length × layers — long agent sessions get evicted or repriced, not "slow".</li>
+      <li><b>Tokenizer surprises:</b> whitespace, numbers, and rare strings split unpredictably, so string-length budgeting drifts from token-length reality.</li>
+      <li>KV cache memory grows linearly with sequence length × layers. Long agent sessions get evicted or repriced, not "slow".</li>
       <li>Greedy decoding isn't determinism: batching, kernels, and floating-point order still introduce run-to-run variance. Evals must assume it.</li>
     </ul></div>
   </div>
@@ -436,18 +436,18 @@ footer a { color:var(--primary); }
 
     <!-- streaming return -->
     <path class="flow dash" d="M837,360 V420 H80 V124" marker-end="url(#arr-t)"/>
-    <text class="tinyt" x="460" y="412">SSE stream — token deltas returned as they are decoded</text>
+    <text class="tinyt" x="460" y="412">SSE stream: token deltas returned as they are decoded</text>
   </svg>
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
       <li><b>Prefill and decode are different workloads:</b> prefill chews the whole prompt in parallel (compute-bound); decode emits one token per step (memory-bandwidth-bound). Time-to-first-token and tokens/sec are set by different hardware limits.</li>
-      <li><b>Continuous batching</b> lets new requests join at every decode step — throughput without head-of-line blocking. It's why your p50 and p99 diverge under load.</li>
+      <li><b>Continuous batching</b> lets new requests join at every decode step, giving throughput without head-of-line blocking. It's why your p50 and p99 diverge under load.</li>
       <li><b>Prompt caching is an architecture decision, not a discount:</b> stable prefixes (system prompt, tool schemas) should come first so repeated calls skip prefill.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li>Agents multiply this path: a 20-step run is 20 serving round-trips. Per-request overhead that's invisible in a chatbot dominates in an agent.</li>
-      <li>One byte changed early in the prompt invalidates the cached prefix — a "harmless" dynamic timestamp in the system prompt can double your bill.</li>
+      <li>One byte changed early in the prompt invalidates the cached prefix. A "harmless" dynamic timestamp in the system prompt can double your bill.</li>
       <li>Rate limits hit token throughput, not request count. Fan-out (multi-agent) designs need budgets per branch or they starve each other.</li>
     </ul></div>
   </div>
@@ -458,7 +458,7 @@ footer a { color:var(--primary); }
     <span class="fig-no">FIG·03</span>
     <div>
       <h3>Context window assembly</h3>
-      <p class="fig-lede">"Context engineering" is a build step. Six competing sources get prioritized, budgeted, truncated, and ordered into one flat token array — because that's all the model ever receives.</p>
+      <p class="fig-lede">"Context engineering" is a build step. Six competing sources get prioritized, budgeted, truncated, and ordered into one flat token array, because that's all the model ever receives.</p>
     </div>
     <span class="fig-tag">SUBSTRATE</span>
   </div>
@@ -500,7 +500,7 @@ footer a { color:var(--primary); }
     <path class="flow" d="M490,215 H532" marker-end="url(#arr-t)"/>
 
     <!-- final sequence bar -->
-    <text class="capm" x="540" y="172">FINAL SEQUENCE — ONE FLAT TOKEN ARRAY</text>
+    <text class="capm" x="540" y="172">FINAL SEQUENCE: ONE FLAT TOKEN ARRAY</text>
     <rect x="540" y="185" width="55"  height="60" fill="rgba(94,234,212,0.28)" stroke="#2dd4bf" stroke-width="1"/>
     <rect x="595" y="185" width="55"  height="60" fill="rgba(167,139,250,0.28)" stroke="#8b5cf6" stroke-width="1"/>
     <rect x="650" y="185" width="45"  height="60" fill="#252d39" stroke="#334155" stroke-width="1"/>
@@ -516,25 +516,25 @@ footer a { color:var(--primary); }
     <text class="tiny" x="895" y="276">user</text>
     <text class="tiny" x="922" y="262">rsv</text>
     <path class="fb dash" d="M540,292 H700"/>
-    <text class="tinya" x="620" y="306">stable prefix — prompt-cache friendly ordering</text>
+    <text class="tinya" x="620" y="306">stable prefix: prompt-cache friendly ordering</text>
 
     <path class="flow" d="M930,215 C954,215 954,390 838,390" marker-end="url(#arr-t)"/>
     <rect class="nd" x="610" y="360" width="220" height="60" rx="9"/>
     <text class="lbl" x="720" y="385">MODEL</text>
     <text class="sub" x="720" y="402">one flat sequence in, tokens out</text>
-    <text class="tiny" x="395" y="430">the model has no "memory", no "files", no "tools" —</text>
+    <text class="tiny" x="395" y="430">the model has no "memory", no "files", no "tools":</text>
     <text class="tiny" x="395" y="444">only what survived assembly into this window</text>
   </svg>
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
       <li><b>Budget explicitly.</b> Give every source a token allowance and an eviction policy (drop, truncate, summarize). Implicit budgets fail silently at the worst time.</li>
-      <li><b>Order for the cache:</b> stable content (system prompt, tool schemas) first, volatile content last — the prefix stays cacheable across every loop iteration.</li>
+      <li><b>Order for the cache:</b> stable content (system prompt, tool schemas) first, volatile content last, so the prefix stays cacheable across every loop iteration.</li>
       <li>Reserve headroom for the response. An assembler that fills 100% of the window starves the model's output.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Context rot:</b> stale tool results and dead-end reasoning accumulate in history and steer later steps. Compaction is a correctness feature, not a cost feature.</li>
-      <li>Retrieved chunks and memory compete for the same budget — without priorities, RAG floods out the user's actual question.</li>
+      <li>Retrieved chunks and memory compete for the same budget. Without priorities, RAG floods out the user's actual question.</li>
       <li>"Lost in the middle": models attend best to the start and end of the window. Where you place instructions changes whether they're followed.</li>
     </ul></div>
   </div>
@@ -595,7 +595,7 @@ footer a { color:var(--primary); }
 
     <path class="ctl" d="M380,428 C290,428 210,372 210,288" marker-end="url(#arr-v)"/>
     <circle class="stepc" cx="268" cy="408" r="8"/><text class="stepn" x="268" y="411">6</text>
-    <text class="tinyv" x="210" y="316">loop — context grows</text>
+    <text class="tinyv" x="210" y="316">loop: context grows</text>
     <text class="tinyv" x="210" y="328">every iteration</text>
 
     <rect class="ghost" x="760" y="400" width="180" height="100" rx="9"/>
@@ -609,7 +609,7 @@ footer a { color:var(--primary); }
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>The model proposes, the runtime disposes.</b> Steps 4–5 are ordinary deterministic code — this is where permissions, sandboxing, retries, and logging live, because it's the only place they <em>can</em> live.</li>
+      <li><b>The model proposes, the runtime disposes.</b> Steps 4-5 are ordinary deterministic code. This is where permissions, sandboxing, retries, and logging live, because it's the only place they <em>can</em> live.</li>
       <li>The loop is <b>stateless per step</b>: nothing persists between iterations except what's written into context. Design the observation format as carefully as the prompt.</li>
       <li>Always bound the loop (turns, tokens, wall-clock). "The model will stop eventually" is not a termination condition.</li>
     </ul></div>
@@ -626,7 +626,7 @@ footer a { color:var(--primary); }
     <span class="fig-no">FIG·05</span>
     <div>
       <h3>Anatomy of a tool call</h3>
-      <p class="fig-lede">Sequence view of a single tool invocation. The model only ever emits text; seven runtime steps turn that text into a validated, permissioned, executed side-effect — and back into tokens.</p>
+      <p class="fig-lede">Sequence view of a single tool invocation. The model only ever emits text; seven runtime steps turn that text into a validated, permissioned, executed side-effect, and back into tokens.</p>
     </div>
     <span class="fig-tag">AGENT CORE</span>
   </div>
@@ -667,24 +667,24 @@ footer a { color:var(--primary); }
 
     <circle class="stepc" cx="40" cy="330" r="8"/><text class="stepn" x="40" y="333">5</text>
     <path class="flow" d="M486,330 H774" marker-end="url(#arr-t)"/>
-    <text class="tinyt" x="630" y="318">dispatch handler(args) — timeout · idempotency key</text>
+    <text class="tinyt" x="630" y="318">dispatch handler(args) · timeout · idempotency key</text>
 
     <circle class="stepc" cx="40" cy="390" r="8"/><text class="stepn" x="40" y="393">6</text>
     <path class="flow" d="M774,390 H486" marker-end="url(#arr-t)"/>
-    <text class="tiny" x="630" y="378">result | error — serialized, truncated to budget</text>
+    <text class="tiny" x="630" y="378">result | error: serialized, truncated to budget</text>
 
     <circle class="stepc" cx="40" cy="450" r="8"/><text class="stepn" x="40" y="453">7</text>
     <path class="ctl" d="M474,450 H208" marker-end="url(#arr-v)"/>
     <text class="tinyv" x="340" y="438">tool_result appended → next forward pass</text>
 
-    <text class="tiny" x="480" y="512">the model never executes anything —</text>
+    <text class="tiny" x="480" y="512">the model never executes anything:</text>
     <text class="tiny" x="480" y="526">it emits text the runtime chooses to act on</text>
   </svg>
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
       <li><b>Schema design is prompt design:</b> the tool's name, description, and parameter names are read by the model as instructions. Vague schemas produce vague calls.</li>
-      <li>Validate <em>before</em> permission-check, and feed validation errors back verbatim (step 3) — models self-correct malformed args reliably when shown the error.</li>
+      <li>Validate <em>before</em> permission-check, and feed validation errors back verbatim (step 3). Models self-correct malformed args reliably when shown the error.</li>
       <li><b>Truncate results deliberately</b> (step 6): a 2MB JSON response is a context-window attack from your own database.</li>
       <li><b>Not every result has to pass through the model.</b> With programmatic tool calling the model emits code that calls tools inside a sandbox, and only the final value re-enters context at step 7. Reach for it when intermediate results are large or numerous.</li>
     </ul></div>
@@ -700,7 +700,7 @@ footer a { color:var(--primary); }
   <div class="fig-head">
     <span class="fig-no">FIG·06</span>
     <div>
-      <h3>MCP — the integration bus</h3>
+      <h3>MCP: the integration bus</h3>
       <p class="fig-lede">The Model Context Protocol turns M×N custom integrations into M+N: one host runs one client per server over JSON-RPC, every server exposes the same three primitives (tools, resources, prompts), and since the 2026-07-28 revision every request is self-contained: no handshake, no session.</p>
     </div>
     <span class="fig-tag">AGENT CORE</span>
@@ -708,7 +708,7 @@ footer a { color:var(--primary); }
   <div class="svg-wrap">
   <svg class="diagram" viewBox="0 0 960 440" role="img" aria-label="Diagram of Model Context Protocol architecture (revision 2026-07-28): a host with an agent loop and per-server MCP clients making stateless, self-contained requests over stdio and streamable HTTP transports to MCP servers exposing tools, resources and prompts">
     <rect class="grp" x="20" y="40" width="300" height="330" rx="10"/>
-    <text class="cap" x="34" y="60">HOST — AGENT RUNTIME</text>
+    <text class="cap" x="34" y="60">HOST: AGENT RUNTIME</text>
     <rect class="nd" x="40" y="80" width="200" height="56" rx="8"/>
     <text class="lbl2" x="140" y="101">AGENT LOOP</text>
     <text class="sub" x="140" y="117">FIG·04</text>
@@ -725,14 +725,14 @@ footer a { color:var(--primary); }
 
     <path class="flow" d="M240,205 C400,205 400,120 552,120" marker-end="url(#arr-t)"/>
     <text class="tinya" x="400" y="134">_meta carries version + capabilities · server/discover</text>
-    <text class="tinyt" x="400" y="152">stdio — local process</text>
+    <text class="tinyt" x="400" y="152">stdio: local process</text>
     <path class="flow" d="M240,285 C400,285 400,310 552,310" marker-end="url(#arr-t)"/>
     <text class="tinyt" x="400" y="272">streamable HTTP · OAuth · Mcp-Method / Mcp-Name</text>
-    <text class="tiny" x="400" y="392">every transport speaks JSON-RPC 2.0 —</text>
+    <text class="tiny" x="400" y="392">every transport speaks JSON-RPC 2.0:</text>
     <text class="tiny" x="400" y="405">requests, responses, multi-round-trip requests (MRTR)</text>
 
     <rect class="grp" x="560" y="50" width="380" height="140" rx="10"/>
-    <text class="cap" x="574" y="70">MCP SERVER — FILESYSTEM (LOCAL)</text>
+    <text class="cap" x="574" y="70">MCP SERVER: FILESYSTEM (LOCAL)</text>
     <rect class="nd" x="580" y="92" width="110" height="44" rx="7"/>
     <text class="lbl2" x="635" y="118">TOOLS</text>
     <rect class="nd" x="700" y="92" width="110" height="44" rx="7"/>
@@ -744,7 +744,7 @@ footer a { color:var(--primary); }
     <text class="tiny" x="872" y="156">templates</text>
 
     <rect class="grp" x="560" y="240" width="380" height="140" rx="10"/>
-    <text class="cap" x="574" y="260">MCP SERVER — GITHUB (REMOTE)</text>
+    <text class="cap" x="574" y="260">MCP SERVER: GITHUB (REMOTE)</text>
     <rect class="nd" x="580" y="282" width="110" height="44" rx="7"/>
     <text class="lbl2" x="635" y="308">TOOLS</text>
     <rect class="nd" x="700" y="282" width="110" height="44" rx="7"/>
@@ -760,12 +760,12 @@ footer a { color:var(--primary); }
     <div class="note design"><h4>Design notes</h4><ul>
       <li><b>The protocol is the contract:</b> since revision 2026-07-28 there is no <code>initialize</code> handshake and no <code>Mcp-Session-Id</code>. Every request carries its protocol version and client capabilities in <code>_meta</code>, with <code>server/discover</code> to fetch server capabilities on demand. A server sits behind a load balancer like any other HTTP service, and the M×N integration matrix still collapses to M+N.</li>
       <li>Tools are model-controlled, resources are app-controlled, prompts are user-controlled. Choosing the right primitive is an API-design decision, not a naming one.</li>
-      <li>Server tool descriptions enter your context window (FIG·03). Twenty connected servers can spend your budget before the user types a word — lazy-load or search tools instead of front-loading all schemas.</li>
+      <li>Server tool descriptions enter your context window (FIG·03). Twenty connected servers can spend your budget before the user types a word. Lazy-load or search tools instead of front-loading all schemas.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
-      <li><b>Trust boundary:</b> a third-party MCP server injects text straight into your loop — tool descriptions and results are both injection surfaces. Treat servers like npm dependencies, not like config.</li>
+      <li><b>Trust boundary:</b> a third-party MCP server injects text straight into your loop. Tool descriptions and results are both injection surfaces. Treat servers like npm dependencies, not like config.</li>
       <li>Remote servers add OAuth, network partitions, and version skew to what used to be a local function call. Timeouts and degraded modes are part of the design.</li>
-      <li>Two servers exporting similarly-named tools (<code>search</code>, <code>query</code>) make the model's tool choice ambiguous — namespace or curate.</li>
+      <li>Two servers exporting similarly-named tools (<code>search</code>, <code>query</code>) make the model's tool choice ambiguous. Namespace or curate.</li>
       <li><b>Stateless moved the state, it did not delete it.</b> Anything you keyed off <code>Mcp-Session-Id</code> now needs an explicit handle in your harness or context (FIG·03, FIG·08). Roots, sampling and logging are deprecated and <code>resources/subscribe</code> is gone, so a 2026-07-28-only server answers legacy clients with 405 or MethodNotFound.</li>
     </ul></div>
   </div>
@@ -782,7 +782,7 @@ footer a { color:var(--primary); }
   <div class="svg-wrap">
   <svg class="diagram" viewBox="0 0 960 460" role="img" aria-label="Diagram of retrieval-augmented generation with an offline ingest lane from sources through parsing, chunking, embedding into a vector index, and an online query lane through hybrid search and reranking into top chunks for the context assembler">
     <rect class="grp" x="20" y="30" width="920" height="170" rx="10"/>
-    <text class="cap" x="34" y="50">INGEST — OFFLINE PIPELINE</text>
+    <text class="cap" x="34" y="50">INGEST: OFFLINE PIPELINE</text>
     <rect class="nd" x="40" y="75" width="130" height="56" rx="8"/>
     <text class="lbl2" x="105" y="96">SOURCES</text>
     <text class="sub" x="105" y="112">docs · wikis · tickets</text>
@@ -808,7 +808,7 @@ footer a { color:var(--primary); }
     <text class="tinya" x="645" y="226">ANN lookup at query time</text>
 
     <rect class="grp" x="20" y="240" width="920" height="215" rx="10"/>
-    <text class="cap" x="34" y="260">QUERY — ONLINE, PER AGENT STEP</text>
+    <text class="cap" x="34" y="260">QUERY: ONLINE, PER AGENT STEP</text>
     <rect class="nd" x="40" y="285" width="130" height="56" rx="8"/>
     <text class="lbl2" x="105" y="306">QUERY</text>
     <text class="sub" x="105" y="322">often a tool call</text>
@@ -836,12 +836,12 @@ footer a { color:var(--primary); }
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>In agentic systems, retrieval is usually a tool</b> the model calls with its own rewritten query — often several times with refinements — not a one-shot pre-step bolted before the prompt.</li>
+      <li><b>In agentic systems, retrieval is usually a tool</b> the model calls with its own rewritten query (often several times with refinements), not a one-shot pre-step bolted before the prompt.</li>
       <li>Hybrid beats pure-vector in practice: embeddings miss exact identifiers (error codes, SKUs, names) that BM25 catches trivially.</li>
       <li>The reranker is the cheapest quality win in the stack: retrieve 50 loosely, keep the 5 a cross-encoder actually scores as relevant.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
-      <li><b>Ingest/query drift:</b> change the embedding model or chunking policy without re-indexing and retrieval quietly degrades — version the index like a schema.</li>
+      <li><b>Ingest/query drift:</b> change the embedding model or chunking policy without re-indexing and retrieval quietly degrades. Version the index like a schema.</li>
       <li>Retrieval quality is invisible without its own eval: measure recall@k against a labeled set, or you'll debug "hallucinations" that are really retrieval misses.</li>
       <li>Chunk boundaries that split tables, code blocks, or definitions hand the model half-facts it will confidently complete.</li>
     </ul></div>
@@ -853,7 +853,7 @@ footer a { color:var(--primary); }
     <span class="fig-no">FIG·08</span>
     <div>
       <h3>Memory architecture</h3>
-      <p class="fig-lede">"Memory" is three different stores plus a discipline: the volatile working context, persistent episodic/semantic/procedural stores, an async reflection process that writes back — and compaction keeping the window alive.</p>
+      <p class="fig-lede">"Memory" is three different stores plus a discipline: the volatile working context, persistent episodic/semantic/procedural stores, an async reflection process that writes back, and compaction keeping the window alive.</p>
     </div>
     <span class="fig-tag">AGENT CORE</span>
   </div>
@@ -890,7 +890,7 @@ footer a { color:var(--primary); }
     <rect class="nd" x="700" y="240" width="220" height="56" rx="8"/>
     <text class="lbl2" x="810" y="261">PROCEDURAL</text>
     <text class="sub" x="810" y="277">skills · playbooks</text>
-    <text class="tiny" x="810" y="330">plain files or DB —</text>
+    <text class="tiny" x="810" y="330">plain files or DB:</text>
     <text class="tiny" x="810" y="343">survives the session</text>
 
     <path class="fb dash" d="M610,300 C655,300 655,120 696,120" marker-end="url(#arr-a)"/>
@@ -901,19 +901,19 @@ footer a { color:var(--primary); }
     <path class="flow dash" d="M700,96 C650,96 650,88 606,88" marker-end="url(#arr-t)"/>
     <path class="flow dash" d="M700,176 C645,176 645,115 606,115" marker-end="url(#arr-t)"/>
     <path class="flow dash" d="M700,256 C635,256 635,145 606,145" marker-end="url(#arr-t)"/>
-    <text class="tinyt" x="648" y="66">recall at turn start — relevance-scored</text>
+    <text class="tinyt" x="648" y="66">recall at turn start: relevance-scored</text>
   </svg>
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>Working context is not memory</b> — it's a cache with brutal eviction. Anything worth keeping must be explicitly written somewhere persistent before compaction eats it.</li>
+      <li><b>Working context is not memory.</b> It's a cache with brutal eviction. Anything worth keeping must be explicitly written somewhere persistent before compaction eats it.</li>
       <li>Split by type because access patterns differ: episodic is append-only and searched rarely; semantic is small, hot, and loaded every session; procedural changes agent <em>behavior</em> and deserves review like code.</li>
-      <li>Reflection runs off the critical path — an agent that pauses mid-task to journal is spending the user's latency on its own bookkeeping.</li>
+      <li>Reflection runs off the critical path. An agent that pauses mid-task to journal is spending the user's latency on its own bookkeeping.</li>
       <li>The stores now have off-the-shelf shapes: provider memory tools and server-side compaction with tool-result clearing cover the working-context and semantic lanes, and procedural memory has a de facto standard in skills (one <code>SKILL.md</code> per directory, loaded by progressive disclosure: frontmatter at startup, body on demand).</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Memory poisoning:</b> one wrong extracted "fact" gets recalled into every future session and compounds. Memories need provenance and an expiry/correction path.</li>
-      <li>Recall is retrieval (FIG·07) with the same failure modes — irrelevant memories in context are worse than none, they masquerade as ground truth.</li>
+      <li>Recall is retrieval (FIG·07) with the same failure modes. Irrelevant memories in context are worse than none, they masquerade as ground truth.</li>
       <li>Compaction summaries silently drop the detail that mattered ("port 5433, not 5432"). Summarize with a schema, not freeform prose.</li>
     </ul></div>
   </div>
@@ -980,19 +980,19 @@ footer a { color:var(--primary); }
     <path class="mut dash" d="M140,340 C130,370 130,390 130,414" marker-end="url(#arr-m)"/>
     <text class="tiny" x="130" y="480">share work, not context</text>
 
-    <text class="tiny" x="810" y="480">contexts are isolated —</text>
+    <text class="tiny" x="810" y="480">contexts are isolated:</text>
     <text class="tiny" x="810" y="494">agents exchange messages, not memory</text>
   </svg>
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>Decompose by context, not by org chart.</b> A subtask is worth a worker when it needs tokens the parent can't spare — not because "reviewer" sounds like a job title.</li>
+      <li><b>Decompose by context, not by org chart.</b> A subtask is worth a worker when it needs tokens the parent can't spare, not because "reviewer" sounds like a job title.</li>
       <li>Task specs are the API: each worker gets a self-contained brief and returns structured results. If a worker needs to ask questions, the decomposition failed.</li>
-      <li>Fan-out multiplies cost linearly and error rate combinatorially — the critic exists because merging three unverified outputs compounds their mistakes.</li>
+      <li>Fan-out multiplies cost linearly and error rate combinatorially. The critic exists because merging three unverified outputs compounds their mistakes.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Telephone-game loss:</b> every hop between agents drops detail. Pass artifacts (files, diffs, data) rather than summaries of summaries.</li>
-      <li>Two workers editing shared state concurrently — isolate write surfaces (per-worker worktrees) or serialize the writes.</li>
+      <li>Two workers editing shared state concurrently. Isolate write surfaces (per-worker worktrees) or serialize the writes.</li>
       <li>Orchestrators that trust worker self-reports: "done ✓" from a worker is a claim, not a fact. Verification is the orchestrator's job.</li>
     </ul></div>
   </div>
@@ -1030,7 +1030,7 @@ footer a { color:var(--primary); }
     <text class="lbl" x="660" y="196">POLICY ENGINE</text>
     <text class="sub" x="660" y="214">classify blast radius</text>
 
-    <text class="tinyt" x="860" y="160">tier 0 — read-only → auto-run</text>
+    <text class="tinyt" x="860" y="160">tier 0: read-only → auto-run</text>
     <path class="flow" d="M750,202 H774" marker-end="url(#arr-t)"/>
     <rect class="nd-t" x="780" y="170" width="160" height="64" rx="9"/>
     <text class="lbl" x="860" y="196">EXECUTE</text>
@@ -1040,12 +1040,12 @@ footer a { color:var(--primary); }
     <rect class="nd-a" x="780" y="280" width="160" height="60" rx="9"/>
     <text class="lbl2" x="860" y="304">HUMAN GATE</text>
     <text class="sub" x="860" y="320">review · approve</text>
-    <text class="tinya" x="860" y="364">tier 1 — mutating → human approves</text>
+    <text class="tinya" x="860" y="364">tier 1: mutating → human approves</text>
     <path class="flow dash" d="M860,278 V240" marker-end="url(#arr-t)"/>
     <text class="tinyt" x="892" y="262">ok</text>
 
     <path class="err" d="M620,234 C600,262 592,272 592,294" marker-end="url(#arr-e)"/>
-    <text class="tinye" x="470" y="274">tier 2 — destructive → deny</text>
+    <text class="tinye" x="470" y="274">tier 2: destructive → deny</text>
     <rect class="nd-e" x="520" y="300" width="190" height="50" rx="8"/>
     <text class="lbl2" x="615" y="321">BLOCKED</text>
     <text class="sub" x="615" y="337">returned as error to model</text>
@@ -1059,13 +1059,13 @@ footer a { color:var(--primary); }
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>Gate actions, not conversations.</b> The reviewable unit is the proposed tool call with its exact arguments — a diff, a query, a recipient list — not a chat transcript.</li>
+      <li><b>Gate actions, not conversations.</b> The reviewable unit is the proposed tool call with its exact arguments (a diff, a query, a recipient list), not a chat transcript.</li>
       <li>Tier by reversibility: reads auto-run, reversible writes get logged, irreversible or outward-facing actions (send, delete, pay, deploy) get a human. Encode this in the policy engine, not in the prompt.</li>
       <li>Ration the human's attention: if the gate fires on everything, approvals become rubber stamps within a week. Tight tiers keep review meaningful.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Prompt-level guardrails alone:</b> "never delete data" in the system prompt is a suggestion; the policy engine's deny is enforcement. Injected instructions can beat the former, not the latter.</li>
-      <li>Blocked actions returned as raw refusals cause retry loops — return a structured error the model can plan around.</li>
+      <li>Blocked actions returned as raw refusals cause retry loops. Return a structured error the model can plan around.</li>
       <li>The exfiltration triad: private data + untrusted input + an outbound channel in one agent. If you can't remove a leg, gate the outbound channel.</li>
     </ul></div>
   </div>
@@ -1076,7 +1076,7 @@ footer a { color:var(--primary); }
     <span class="fig-no">FIG·11</span>
     <div>
       <h3>Failure modes → recovery, mapped</h3>
-      <p class="fig-lede">The five ways agent runs actually die, each paired with the mechanism that catches it. None of these are exotic — they're distributed-systems patterns pointed at a non-deterministic component.</p>
+      <p class="fig-lede">The five ways agent runs actually die, each paired with the mechanism that catches it. None of these are exotic. They're distributed-systems patterns pointed at a non-deterministic component.</p>
     </div>
     <span class="fig-tag">RELIABILITY</span>
   </div>
@@ -1107,7 +1107,7 @@ footer a { color:var(--primary); }
     <path class="mut" d="M420,258 H554" marker-end="url(#arr-m)"/>
     <rect class="nd-t" x="560" y="230" width="340" height="56" rx="8"/>
     <text class="lbl2" x="730" y="252">INDEPENDENT VERIFICATION</text>
-    <text class="sub" x="730" y="268">tests · asserts · judge — never self-report</text>
+    <text class="sub" x="730" y="268">tests · asserts · judge, never self-report</text>
 
     <rect class="nd-e" x="120" y="310" width="300" height="56" rx="8"/>
     <text class="lbl2" x="270" y="332">CONTEXT OVERFLOW</text>
@@ -1126,18 +1126,18 @@ footer a { color:var(--primary); }
     <text class="sub" x="730" y="428">halt → escalate to human</text>
 
     <rect class="ghost" x="120" y="480" width="780" height="56" rx="9"/>
-    <text class="sub" x="510" y="502">STATE CHECKPOINTS — resume, don't restart</text>
+    <text class="sub" x="510" y="502">STATE CHECKPOINTS: resume, don't restart</text>
     <text class="tiny" x="510" y="518">persist loop state each step · idempotency keys on every side-effect</text>
   </svg>
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
       <li><b>Row 3 is the dangerous one.</b> Transport errors announce themselves; a plausible wrong answer doesn't. Budget most of your engineering into verification, not retries.</li>
-      <li>Recovery lives in the runtime, deterministically — asking the model to "please be careful" is not an error-handling strategy.</li>
+      <li>Recovery lives in the runtime, deterministically. Asking the model to "please be careful" is not an error-handling strategy.</li>
       <li>Checkpoint at step boundaries: a 40-step run that dies at step 39 should cost one step to finish, not forty.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
-      <li>Retrying a <em>mutating</em> call that half-succeeded — hence idempotency keys before retry policies.</li>
+      <li>Retrying a <em>mutating</em> call that half-succeeded, hence idempotency keys before retry policies.</li>
       <li>Compaction as a recovery can drop the very constraint that caused the failure, so the agent repeats it with a cleaner conscience.</li>
       <li>Circuit breakers tuned by gut feel: derive thresholds from observed traces (FIG·14), or they'll fire on your best runs and sleep through your worst.</li>
     </ul></div>
@@ -1189,7 +1189,7 @@ footer a { color:var(--primary); }
     <text class="sub" x="685" y="298">rubric (FIG·13)</text>
     <rect class="nd" x="780" y="250" width="130" height="80" rx="8"/>
     <text class="lbl2" x="845" y="282">HUMAN</text>
-    <text class="sub" x="845" y="298">5–10% audit</text>
+    <text class="sub" x="845" y="298">5-10% audit</text>
 
     <path class="fb" d="M515,330 C515,370 590,382 598,396" marker-end="url(#arr-a)"/>
     <path class="fb" d="M685,330 C685,365 665,378 658,396" marker-end="url(#arr-a)"/>
@@ -1208,14 +1208,14 @@ footer a { color:var(--primary); }
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>Run every case N times.</b> One trial of a non-deterministic system is an anecdote. Report <code>pass@k</code> (can it?) and <code>pass^k</code> (does it reliably?) — they answer different product questions.</li>
-      <li>Grade <em>outcomes</em>, not transcripts: assert on the final state of the sandbox — the ticket updated, the test passing, the file correct — not on whether the reasoning "looked right".</li>
+      <li><b>Run every case N times.</b> One trial of a non-deterministic system is an anecdote. Report <code>pass@k</code> (can it?) and <code>pass^k</code> (does it reliably?). They answer different product questions.</li>
+      <li>Grade <em>outcomes</em>, not transcripts: assert on the final state of the sandbox (the ticket updated, the test passing, the file correct), not on whether the reasoning "looked right".</li>
       <li>Start with 20 cases mined from real failures over 500 synthetic ones. Coverage of what actually goes wrong beats volume.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Eval-set overfitting:</b> prompts tuned against the same 50 cases for months are memorizing your test, not improving. Hold out a set that never influences iteration.</li>
       <li>Unpinned dependencies: if the eval hits live APIs or a drifting model version, score changes don't mean what you think they mean.</li>
-      <li>A single aggregate score hides regressions — capability A improving 10% while capability B silently drops 15% reads as "+2% overall, ship it".</li>
+      <li>A single aggregate score hides regressions. Capability A improving 10% while capability B silently drops 15% reads as "+2% overall, ship it".</li>
     </ul></div>
   </div>
 </article>
@@ -1225,7 +1225,7 @@ footer a { color:var(--primary); }
     <span class="fig-no">FIG·13</span>
     <div>
       <h3>LLM-as-judge, calibrated</h3>
-      <p class="fig-lede">Using a model to grade a model works — but only as an instrument you've calibrated. The judge gets a rubric, bias controls, and a standing comparison against human labels. An uncalibrated judge is a random-number generator with confidence.</p>
+      <p class="fig-lede">Using a model to grade a model works, but only as an instrument you've calibrated. The judge gets a rubric, bias controls, and a standing comparison against human labels. An uncalibrated judge is a random-number generator with confidence.</p>
     </div>
     <span class="fig-tag">EVALS</span>
   </div>
@@ -1247,7 +1247,7 @@ footer a { color:var(--primary); }
 
     <rect class="nd-v" x="260" y="120" width="190" height="90" rx="9"/>
     <text class="lbl" x="355" y="152">JUDGE PROMPT</text>
-    <text class="sub" x="355" y="170">pointwise 1–5</text>
+    <text class="sub" x="355" y="170">pointwise 1-5</text>
     <text class="sub" x="355" y="185">or pairwise A/B</text>
     <path class="flow" d="M450,165 H494" marker-end="url(#arr-t)"/>
     <rect class="nd" x="500" y="120" width="180" height="90" rx="9"/>
@@ -1285,12 +1285,12 @@ footer a { color:var(--primary); }
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
       <li><b>The rubric is the spec.</b> Vague criteria ("is it helpful?") produce vibes; behavioral criteria with worked examples ("does it cite the retrieved source for every factual claim?") produce measurements.</li>
-      <li>Pairwise A/B is more reliable than absolute scoring for subtle quality gaps — models are better comparators than raters.</li>
-      <li>Report judge–human agreement (Cohen's κ) alongside every eval result. A judge you haven't measured against humans is itself an unevaluated model.</li>
+      <li>Pairwise A/B is more reliable than absolute scoring for subtle quality gaps. Models are better comparators than raters.</li>
+      <li>Report judge-human agreement (Cohen's κ) alongside every eval result. A judge you haven't measured against humans is itself an unevaluated model.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Self-preference:</b> judges from the same model family rate their sibling's style higher. Cross-family judging or ensembles blunt it.</li>
-      <li>Position and verbosity bias are large enough to flip pairwise conclusions — swap-and-rejudge isn't optional hygiene, it's the measurement.</li>
+      <li>Position and verbosity bias are large enough to flip pairwise conclusions. Swap-and-rejudge isn't optional hygiene, it's the measurement.</li>
       <li>Judge drift: upgrade the judge model and historical scores stop being comparable. Pin the judge per eval-set version, migrate deliberately.</li>
     </ul></div>
   </div>
@@ -1300,16 +1300,16 @@ footer a { color:var(--primary); }
     <span class="fig-no">FIG·14</span>
     <div>
       <h3>The observability plane</h3>
-      <p class="fig-lede">An agent run is a distributed trace: every loop step is a span with token, cost, latency, and status attributes. One collector fans out to debugging, metrics, alerting — and the review queue that feeds your evals.</p>
+      <p class="fig-lede">An agent run is a distributed trace: every loop step is a span with token, cost, latency, and status attributes. One collector fans out to debugging, metrics, alerting, and the review queue that feeds your evals.</p>
     </div>
     <span class="fig-tag">OBSERVABILITY</span>
   </div>
   <div class="svg-wrap">
   <svg class="diagram" viewBox="0 0 960 520" role="img" aria-label="Diagram of agent observability: a trace tree of invoke_agent, chat and execute_tool spans named per the OpenTelemetry GenAI semantic conventions flows through an OTel collector to a trace explorer, metrics, alerts, and transcript sampling that feeds eval datasets">
     <rect class="grp" x="20" y="40" width="450" height="340" rx="10"/>
-    <text class="cap" x="34" y="60">ONE AGENT RUN — TRACE TREE</text>
+    <text class="cap" x="34" y="60">ONE AGENT RUN: TRACE TREE</text>
     <rect class="bar" x="40" y="80" width="410" height="30" rx="4"/>
-    <text class="sub ta-s" x="50" y="99">session #a1f3 — 14 turns · 96k tok · $0.42</text>
+    <text class="sub ta-s" x="50" y="99">session #a1f3 · 14 turns · 96k tok · $0.42</text>
     <rect class="bar" x="60" y="122" width="370" height="28" rx="4"/>
     <text class="sub ta-s" x="70" y="140">invoke_agent · turn 3 · "fix the failing deploy"</text>
     <rect class="nd-t" x="80" y="162" width="330" height="26" rx="4"/>
@@ -1354,7 +1354,7 @@ footer a { color:var(--primary); }
     <text class="lbl2" x="830" y="383">TRANSCRIPT SAMPLING</text>
     <text class="sub" x="830" y="399">human review queue</text>
 
-    <text class="tiny" x="245" y="440">you can't eval what you didn't record —</text>
+    <text class="tiny" x="245" y="440">you can't eval what you didn't record:</text>
     <text class="tiny" x="245" y="454">traces are where eval datasets come from</text>
     <path class="fb dash" d="M780,420 C780,470 730,482 716,482" marker-end="url(#arr-a)"/>
     <rect class="ghost" x="460" y="460" width="250" height="44" rx="8"/>
@@ -1366,13 +1366,13 @@ footer a { color:var(--primary); }
     <div class="note design"><h4>Design notes</h4><ul>
       <li><b>Trace at the step level, always.</b> Aggregate metrics tell you something regressed; only the span tree tells you it was turn 7, after that one tool timeout, in contexts over 80k tokens.</li>
       <li>Cost is a first-class metric: $/task and tokens/task catch runaway loops days before the invoice does. Alert on rate-of-change, not absolutes.</li>
-      <li>Use the same trace format in the eval harness (FIG·12) and production — then a failed eval and a failed prod run are debuggable with the same tooling.</li>
+      <li>Use the same trace format in the eval harness (FIG·12) and production. Then a failed eval and a failed prod run are debuggable with the same tooling.</li>
       <li>Name spans by the OpenTelemetry GenAI conventions (<code>gen_ai.operation.name</code>: <code>chat</code>, <code>invoke_agent</code>, <code>execute_tool</code>) and attach grader verdicts as <code>gen_ai.evaluation.result</code> events, so FIG·12's scorecard rides the same pipeline. The conventions are still Development status, in their own repo since June 2026, so pin the version you emit.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>Logging the metadata but not the payloads:</b> latency without prompts and completions can't explain <em>why</em> quality moved. Record content, redact PII at the collector.</li>
       <li>Sampling only errors: the "successful" runs users quietly abandoned are your biggest quality signal, and error-only sampling never sees them.</li>
-      <li>Traces with no session/user/version dimensions can't answer "did the new prompt help?" — tag every span with the config version that produced it.</li>
+      <li>Traces with no session/user/version dimensions can't answer "did the new prompt help?" Tag every span with the config version that produced it.</li>
     </ul></div>
   </div>
 </article>
@@ -1432,13 +1432,13 @@ footer a { color:var(--primary); }
   </div>
   <div class="fig-notes">
     <div class="note design"><h4>Design notes</h4><ul>
-      <li><b>The flywheel is the moat.</b> Prompts get copied and models get upgraded, but a curated corpus of your domain's real failure cases — and the harness that runs them — compounds and doesn't transfer.</li>
+      <li><b>The flywheel is the moat.</b> Prompts get copied and models get upgraded, but a curated corpus of your domain's real failure cases (and the harness that runs them) compounds and doesn't transfer.</li>
       <li>Model upgrades become cheap when the loop exists: swap the model, run the goldens, read the diff. Without it, every upgrade is a leap of faith.</li>
-      <li>Implicit signals (retries, abandons, escalations, edits to agent output) are higher-volume and more honest than thumbs — instrument them first.</li>
+      <li>Implicit signals (retries, abandons, escalations, edits to agent output) are higher-volume and more honest than thumbs. Instrument them first.</li>
     </ul></div>
     <div class="note breaks"><h4>What breaks</h4><ul>
       <li><b>The loop silently opens:</b> traces get sampled, nobody curates, the golden set fossilizes at last quarter's failure modes while the product moved on. Assign the curation rotation like on-call.</li>
-      <li>Curating only complaints skews the eval set toward loud users and rare disasters — sample the mundane middle too.</li>
+      <li>Curating only complaints skews the eval set toward loud users and rare disasters. Sample the mundane middle too.</li>
       <li>Personal data flowing from prod traces into eval sets without redaction turns your test fixtures into a compliance incident.</li>
     </ul></div>
   </div>

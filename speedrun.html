@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agentic AI — The 5-Minute Speedrun</title>
+<title>Agentic AI: The 5-Minute Speedrun</title>
 <meta name="description" content="The whole agentic AI atlas in 15 flash cards. One idea per card, one thing to remember. Built for short attention spans.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -107,7 +107,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
   <div class="over">The 5-minute speedrun</div>
   <h1>Agentic AI.<br><em>One idea per card.</em></h1>
   <p>The whole 15-figure atlas, compressed. Read a card, check it off, move on. Come back for the deep version whenever a card hooks you.</p>
-  <div class="rule">the entire field in one line:<br><b>tokens in → a loop that acts → tokens out</b> — everything else is safety rails and receipts</div>
+  <div class="rule">the entire field in one line:<br><b>tokens in → a loop that acts → tokens out</b>. Everything else is safety rails and receipts</div>
 </section>
 
 <main class="deck">
@@ -116,7 +116,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
 
 <article class="card" id="c1">
   <div class="top"><span class="num">01</span><h2>It's all tokens</h2><input class="check" type="checkbox" aria-label="Mark card 1 grasped"></div>
-  <p class="what">The model never sees words, JSON, or "instructions" — just integer IDs. It predicts <b>one token per full pass</b> through the network, appends it, and runs again.</p>
+  <p class="what">The model never sees words, JSON, or "instructions", just integer IDs. It predicts <b>one token per full pass</b> through the network, appends it, and runs again.</p>
   <div class="flow"><span class="n">"Explain KV caches"</span><span class="ar t">→</span><span class="n t">[849, 34745…]</span><span class="ar t">→</span><span class="n">model</span><span class="ar t">→</span><span class="n t">next token</span><span class="ar v">⟲ repeat</span></div>
   <div class="mem"><span class="k">REMEMBER</span><p>Every single output token = one full forward pass. That's the heartbeat.</p></div>
 </article>
@@ -130,9 +130,9 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
 
 <article class="card" id="c3">
   <div class="top"><span class="num">03</span><h2>There is no memory, only the window</h2><input class="check" type="checkbox" aria-label="Mark card 3 grasped"></div>
-  <p class="what">System prompt, tools, memories, RAG chunks, history, your question — <b>everything competes for one flat token array</b>. An assembler prioritizes, budgets, and truncates.</p>
+  <p class="what">System prompt, tools, memories, RAG chunks, history, your question: <b>everything competes for one flat token array</b>. An assembler prioritizes, budgets, and truncates.</p>
   <div class="flow"><span class="n">system</span><span class="n v">tools</span><span class="n">memory</span><span class="n a">rag</span><span class="n">history</span><span class="ar t">→</span><span class="n v">assembler</span><span class="ar t">→</span><span class="n t">one flat sequence</span></div>
-  <div class="mem"><span class="k">REMEMBER</span><p>Give every source a token budget — unbudgeted context fails silently.</p></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Give every source a token budget. Unbudgeted context fails silently.</p></div>
 </article>
 
 <div class="divider"><span class="pn">PART II</span><span class="pt">The agent itself</span></div>
@@ -148,14 +148,14 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
   <div class="top"><span class="num">05</span><h2>Tool calls are just text</h2><input class="check" type="checkbox" aria-label="Mark card 5 grasped"></div>
   <p class="what">The model emits JSON. The runtime validates it, checks permissions, runs the handler, truncates the result, and feeds it back as tokens. <b>The model never executes anything.</b></p>
   <div class="flow"><span class="n t">{"name":"search",…}</span><span class="ar">→</span><span class="n">validate</span><span class="ar">→</span><span class="n a">policy</span><span class="ar">→</span><span class="n">run</span><span class="ar">→</span><span class="n t">result → tokens</span></div>
-  <div class="mem"><span class="k">REMEMBER</span><p>Tool results are untrusted input — a scraped webpage can inject instructions.</p></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Tool results are untrusted input. A scraped webpage can inject instructions.</p></div>
 </article>
 
 <article class="card" id="c6">
   <div class="top"><span class="num">06</span><h2>MCP = USB for AI tools</h2><input class="check" type="checkbox" aria-label="Mark card 6 grasped"></div>
   <p class="what">One protocol (JSON-RPC) between your agent and any server. Every server exposes the same three things: <b>tools, resources, prompts</b>. M×N custom integrations become M+N.</p>
   <div class="flow"><span class="n">agent host</span><span class="ar t">→</span><span class="n v">MCP client</span><span class="ar t">→</span><span class="n">github · postgres · files…</span></div>
-  <div class="mem"><span class="k">REMEMBER</span><p>Treat MCP servers like npm dependencies, not config — they inject text into your loop.</p></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Treat MCP servers like npm dependencies, not config. They inject text into your loop.</p></div>
 </article>
 
 <article class="card" id="c7">
@@ -183,7 +183,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
 
 <article class="card" id="c10">
   <div class="top"><span class="num">10</span><h2>Gate actions by blast radius</h2><input class="check" type="checkbox" aria-label="Mark card 10 grasped"></div>
-  <p class="what">Reads auto-run. Reversible writes get logged. Irreversible stuff (send, delete, pay, deploy) gets <b>a human or a hard deny</b>. Enforce it in code — the prompt is a suggestion.</p>
+  <p class="what">Reads auto-run. Reversible writes get logged. Irreversible stuff (send, delete, pay, deploy) gets <b>a human or a hard deny</b>. Enforce it in code. The prompt is a suggestion.</p>
   <div class="flow"><span class="n v">proposed action</span><span class="ar">→</span><span class="n a">policy engine</span><span class="ar t">→</span><span class="n t">auto</span><span class="ar a">/</span><span class="n a">human ok?</span><span class="ar r">/</span><span class="n r">denied</span></div>
   <div class="mem"><span class="k">REMEMBER</span><p>Review the exact tool call (the diff, the recipient), not the conversation.</p></div>
 </article>
@@ -192,7 +192,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
   <div class="top"><span class="num">11</span><h2>Agents die 5 ways</h2><input class="check" type="checkbox" aria-label="Mark card 11 grasped"></div>
   <p class="what">Provider errors → retry. Bad tool args → feed the error back. <b>Confident wrong answers → independent verification.</b> Full context → compact. Loops → circuit breaker.</p>
   <div class="flow"><span class="n r">timeout</span><span class="n r">bad args</span><span class="n r">confident lie</span><span class="n r">overflow</span><span class="n r">loop</span><span class="ar t">→</span><span class="n t">5 known fixes</span></div>
-  <div class="mem"><span class="k">REMEMBER</span><p>The dangerous one is #3 — it doesn't announce itself. Never trust self-reports.</p></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>The dangerous one is #3. It doesn't announce itself. Never trust self-reports.</p></div>
 </article>
 
 <div class="divider"><span class="pn">PART IV</span><span class="pt">How you know it works (the part everyone skips)</span></div>
@@ -205,7 +205,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
 </article>
 
 <article class="card" id="c13">
-  <div class="top"><span class="num">13</span><h2>A model can grade a model — if you calibrate it</h2><input class="check" type="checkbox" aria-label="Mark card 13 grasped"></div>
+  <div class="top"><span class="num">13</span><h2>A model can grade a model, if you calibrate it</h2><input class="check" type="checkbox" aria-label="Mark card 13 grasped"></div>
   <p class="what">Give the judge a rubric with examples, control its biases (position, verbosity, self-preference), and <b>measure its agreement with human labels</b>. No agreement score = no judge.</p>
   <div class="flow"><span class="n">transcript</span><span class="n a">rubric</span><span class="ar">→</span><span class="n">judge</span><span class="ar t">→</span><span class="n t">verdict</span><span class="ar a">⇢ κ vs humans</span></div>
   <div class="mem"><span class="k">REMEMBER</span><p>An uncalibrated judge is a random-number generator with confidence.</p></div>
@@ -222,7 +222,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
   <div class="top"><span class="num">15</span><h2>Close the loop and you compound</h2><input class="check" type="checkbox" aria-label="Mark card 15 grasped"></div>
   <p class="what">Production failures → curated eval cases → safer changes → better agent → richer traces. <b>Teams with this flywheel compound; teams without it guess.</b></p>
   <div class="flow"><span class="n t">prod</span><span class="ar t">→</span><span class="n">traces</span><span class="ar a">→</span><span class="n a">eval cases</span><span class="ar a">→</span><span class="n">iterate</span><span class="ar v">→</span><span class="n a">gate</span><span class="ar t">→</span><span class="n t">prod ⟲</span></div>
-  <div class="mem"><span class="k">REMEMBER</span><p>Prompts get copied, models get upgraded — your failure corpus is the moat.</p></div>
+  <div class="mem"><span class="k">REMEMBER</span><p>Prompts get copied, models get upgraded. Your failure corpus is the moat.</p></div>
 </article>
 
 </main>
@@ -230,7 +230,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
 <section class="finish" id="finish">
   <div class="box">
     <h3><span>🎉 </span>That's the whole field.</h3>
-    <p>Fifteen ideas. Any card that hooked you has a full schematic — with the design decisions and the failure modes — in the deep version.</p>
+    <p>Fifteen ideas. Any card that hooked you has a full schematic, with the design decisions and the failure modes, in the deep version.</p>
     <a class="btn" href="index.html">Open the full atlas →</a>
   </div>
 </section>

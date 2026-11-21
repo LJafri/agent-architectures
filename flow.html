@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agentic AI — The One-Glance Flow</title>
+<title>Agentic AI: The One-Glance Flow</title>
 <meta name="description" content="The entire agentic AI architecture as one follow-the-path flow diagram. Trace it 1 to 5. Built for short attention spans.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,10 +91,10 @@ svg .zone{fill:#64748b;font-size:9.5px;font-weight:700;letter-spacing:.18em;text
     </defs>
 
     <!-- zone labels -->
-    <text class="zone" x="240" y="168">SUBSTRATE — WHAT IT RUNS ON</text>
+    <text class="zone" x="240" y="168">SUBSTRATE: WHAT IT RUNS ON</text>
     <text class="zone" x="665" y="168">THE AGENT CORE</text>
     <text class="zone" x="967" y="168">SAFETY</text>
-    <text class="zone" x="620" y="662">EVALS &amp; OBSERVABILITY — THE RECEIPTS</text>
+    <text class="zone" x="620" y="662">EVALS &amp; OBSERVABILITY: THE RECEIPTS</text>
 
     <!-- beat number circles (own row, no overlap) -->
     <circle class="beat" cx="127" cy="205" r="18"/><text class="beatn" x="127" y="211">1</text>
@@ -110,7 +110,7 @@ svg .zone{fill:#64748b;font-size:9.5px;font-weight:700;letter-spacing:.18em;text
     <path class="flow" d="M1045,300 H1095" marker-end="url(#mt)"/>
     <text class="lblt" x="825" y="291">no tool → done</text>
 
-    <!-- animated data packets gliding the spine (JS rAF — reliable across all browsers) -->
+    <!-- animated data packets gliding the spine (JS rAF, reliable across all browsers) -->
     <circle id="pkt1" r="6" cx="40" cy="300" fill="#5eead4"></circle>
     <circle id="pkt2" r="5" cx="40" cy="300" fill="#a78bfa" opacity="0.75"></circle>
 
@@ -174,7 +174,7 @@ svg .zone{fill:#64748b;font-size:9.5px;font-weight:700;letter-spacing:.18em;text
     <text class="t1" x="1157" y="296">ANSWER</text>
     <text class="s" x="1157" y="316">out ✓</text>
 
-    <!-- ===== return rail — the flywheel (amber) ===== -->
+    <!-- ===== return rail: the flywheel (amber) ===== -->
     <rect class="railbg" x="270" y="565" width="700" height="72" rx="14"/>
     <rect class="box a" x="300" y="580" width="150" height="44" rx="8"/>
     <text class="t2" x="375" y="607">TRACES</text>
@@ -207,7 +207,7 @@ svg .zone{fill:#64748b;font-size:9.5px;font-weight:700;letter-spacing:.18em;text
 <script>
 // Move the two data packets along the spine (x: 40 -> 1200 at y=300).
 // Plain requestAnimationFrame so it works in every browser, including Safari
-// and file:// — no SMIL / mpath / xlink quirks.
+// and file://, with no SMIL / mpath / xlink quirks.
 (function () {
   var p1 = document.getElementById('pkt1'), p2 = document.getElementById('pkt2');
   if (!p1 || !p2) return;

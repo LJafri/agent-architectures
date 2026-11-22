@@ -123,7 +123,7 @@ footer{border-top:1px solid var(--line);padding:2rem;text-align:center;font-fami
 
 <article class="card" id="c2">
   <div class="top"><span class="num">02</span><h2>Serving = read fast, write slow</h2><input class="check" type="checkbox" aria-label="Mark card 2 grasped"></div>
-  <p class="what">Inference has two phases: <b>prefill</b> chews your whole prompt in parallel (fast), <b>decode</b> emits one token at a time (slow). Stable prompt prefixes get cached and skip prefill.</p>
+  <p class="what">Inference has two phases: <b>prefill</b> processes your whole prompt in one parallel pass (compute-bound), <b>decode</b> emits one token per pass (memory-bandwidth-bound). Stable prompt prefixes get cached and skip prefill.</p>
   <div class="flow"><span class="n">request</span><span class="ar t">→</span><span class="n v">batcher</span><span class="ar t">→</span><span class="n">prefill ⚡</span><span class="ar t">→</span><span class="n">decode 🐢</span><span class="ar t">→</span><span class="n t">stream</span></div>
   <div class="mem"><span class="k">REMEMBER</span><p>One changed byte early in the prompt = cache gone = full price. Keep prefixes stable.</p></div>
 </article>

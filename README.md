@@ -1,6 +1,6 @@
-# Agentic AI, Drawn to the Metal
+# Agent Architectures
 
-**A field atlas of 15 hand-drawn SVG schematics covering how agentic AI systems actually work in production**, from the token substrate up through the eval harness and observability plane.
+**Fifteen SVG architecture diagrams of how agentic AI systems work in production**, from inference and the context window through the agent loop, MCP, RAG, memory, orchestration, guardrails, evals, and observability.
 
 **Live:** [ljafri.github.io/agent-architectures](https://ljafri.github.io/agent-architectures/)
 
@@ -12,9 +12,9 @@
 
 ## Why this exists
 
-Most agent diagrams stop at "LLM + tools." They skip the parts that decide whether a system survives contact with real traffic: how the context window is assembled and budgeted, where permissions and retries can actually live, what a tool call looks like on the wire, how the loop terminates, and the eval and observability machinery that makes any of it trustworthy.
+Most agent diagrams stop at the model and its tools. These cover the parts that decide whether a system holds up in production: how the context window is assembled and budgeted, where permissions and retries live, what a tool call looks like on the wire, how the loop terminates, and the eval and observability machinery behind it.
 
-This atlas is the reference I wanted when I started designing and reviewing agentic systems for a regulated fintech. Every figure is drawn at the level where architecture decisions get made, and every figure ships with two columns:
+I built this as the reference I wanted when designing and reviewing agentic systems for a regulated fintech. Each figure is drawn at the level where architecture decisions get made and comes with two columns:
 
 - **Design notes**: the decisions that matter and why.
 - **What breaks**: the failure modes that bite in production, drawn from building and operating these systems rather than from tutorials.
